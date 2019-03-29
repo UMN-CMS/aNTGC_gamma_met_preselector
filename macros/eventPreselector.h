@@ -336,7 +336,7 @@ private:
 		{var_AK8PuppiJet_nb2ecf2_},
 		{var_AK8PuppiJet_nb2ecf3_},
 		{var_AK8PuppiJet_CSVv2},
-		{p_nAK4CHSJets_40GeV},
+		{var_nAK4CHSJets_40GeV},
 		// {var_nAK4CHSJets_in_AK8PuppiJet_0p8},
 		// {var_nAK4CHSJets_in_AK8PuppiJet_1p0},
 		// {var_nAK4CHSJets_in_AK8PuppiJet_1p2},
@@ -347,7 +347,7 @@ private:
 	std::vector<twoDhistogram_template> boostedJetG_2d_Histograms ={
 		{var_phoCalibEt, var_AK8PuppiJet_Pt},
 		{var_phoCalibEt, var_deltaR_AK8PuppiJetG},
-		{var_AK8PuppiJet_Pt, p_nAK4CHSJets_40GeV}
+		{var_AK8PuppiJet_Pt, var_nAK4CHSJets_40GeV}
 	};
 };
 
