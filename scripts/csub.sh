@@ -2,7 +2,7 @@
 
 cmsswDir=/hdfs/store/user/mwadud/CMSSW_9_4_13/src/
 workDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/
-writeDir=/hdfs/store/user/mwadud/aNTGC/preSelected/
+writeDir=/scratch/mwadud/preSelected/jobs/
 jobsDir=/scratch/mwadud/preSelected/jobs/
 
 jobList=$1
@@ -18,12 +18,13 @@ macroTemplate=${workDir}/macroTemplate.C
 runScriptTemplate=${workDir}/submit_job.sh
 condorCFGtemplate=${workDir}/condor_job.sh
 ccfilepath=${workDir}/../macros/eventPreselector.cc
+hfilepath=${workDir}/../macros/eventPreselector.h
 
 current_date_time=$(date +%Y-%m-%d_%H-%M-%S)
 echo $current_date_time;
 
 
-source /afs/cern.ch/work/m/mwadud/private/bin/cmsset_default.sh;
+source /cvmfs/cms.cern.ch/cmsset_default.sh;
 cd ${cmsswDir}; eval `scramv1 runtime -sh`; cd -;
 cd ${workDir}
 
@@ -56,25 +57,25 @@ function preSelectDtaset(){
 
 
 	#### output root file ###
-	outFile=${writeOutDir}//${jobName}.root
+	outFile=${jobName}.root
 	echo	-e	"\t\tOutput file = "${outFile}
 
 
 	### prepare root macro ###
 	rootMacro=${jobDir}/${jobName}.C
+	listFileName=$(basename "${fileListPath}")
 	cp ${macroTemplate} ${rootMacro}
 	sed -i 's|#macroname|'${jobName}'|g' ${rootMacro}
-	sed -i 's|#fileList|'${fileListPath}'|g' ${rootMacro}
+	sed -i 's|#fileList|'${listFileName}'|g' ${rootMacro}
 	sed -i 's|#outfilepath|'${outFile}'|g' ${rootMacro}
-	sed -i 's|#ccfilepath|'${ccfilepath}'|g' ${rootMacro}
+	sed -i 's|#ccfilepath|'eventPreselector.cc'|g' ${rootMacro}
 
 
 	### prepare run script ###
 	runScript=${jobDir}/${jobName}.sh
 	cp ${runScriptTemplate} ${runScript}
 	sed -i 's|#cmsswdir|'${cmsswDir}'|g' ${runScript}
-	sed -i 's|#jobdir|'${jobDir}'|g' ${runScript}
-	sed -i 's|#macrofile|'${rootMacro}'|g' ${runScript}
+	sed -i 's|#macrofile|'${jobName}.C'|g' ${runScript}
 
 
 	chmod +x ${runScript}
@@ -86,6 +87,12 @@ function preSelectDtaset(){
 	sed -i 's|#script|'${runScript}'|g' ${condorCFG}
 	sed -i 's|#logDir|'${logDir}'|g' ${condorCFG}
 	sed -i 's|#jobname|'${jobName}'|g' ${condorCFG}
+	sed -i 's|#ccfile1|'${ccfilepath}'|g' ${condorCFG}
+	sed -i 's|#hfile|'${hfilepath}'|g' ${condorCFG}
+	sed -i 's|#ccfile2|'${rootMacro}'|g' ${condorCFG}
+	sed -i 's|#filelist|'${fileListPath}'|g' ${condorCFG}
+	sed -i 's|#outfile|'${outFile}'|g' ${condorCFG}
+	sed -i 's|#outdir|'${writeOutDir}'|g' ${condorCFG}
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
 
