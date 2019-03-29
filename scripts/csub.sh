@@ -1,15 +1,9 @@
 #!/bin/bash
 
-#cmsswDir=/afs/hep.wisc.edu/home/wadud/private/CMSSW_9_4_13/src/
 cmsswDir=/hdfs/store/user/mwadud/CMSSW_9_4_13/src/
 workDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/
-jobsDir=/hdfs/store/user/mwadud/aNTGC/preSelected/jobs/
-#jobsDir=/nfs_scratch/mwadud/aNTGC/preSelected/jobs/
 writeDir=/hdfs/store/user/mwadud/aNTGC/preSelected/
-# jobsDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
-# writeDir=/scratch/mwadud/aNTGC/preSelected/jobs/
-# jobsDir=/afs/hep.wisc.edu/home/wadud/private/aNTGC/preSelectorJobs/
-# writeDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
+jobsDir=/scratch/mwadud/preSelected/jobs/
 
 jobList=$1
 
@@ -95,8 +89,8 @@ function preSelectDtaset(){
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
 
-#	condor_submit ${condorCFG}
-	farmoutAnalysisJobs  --fwklite --infer-cmssw-path antgc  ${runScript}
+	condor_submit ${condorCFG}
+#	farmoutAnalysisJobs  --fwklite --infer-cmssw-path antgc  ${runScript}
 }
 
 
