@@ -2,3 +2,5 @@
 *.pcm
 *.pyc
 *.so
+test/
+test_files/
