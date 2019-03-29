@@ -92,7 +92,8 @@ function preSelectDtaset(){
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
 
-	condor_submit ${condorCFG}
+	# condor_submit ${condorCFG}
+	farmoutAnalysisJobs ${jobName} --fwklite
 }
 
 
