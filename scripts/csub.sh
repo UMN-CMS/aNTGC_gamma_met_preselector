@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# cmsswDir=/afs/hep.wisc.edu/home/wadud/private/CMSSW_9_4_13/src/
-cmsswDir=/afs/cern.ch/work/m/mwadud/private/naTGC/CMSSW_9_4_13/src/
+cmsswDir=/afs/hep.wisc.edu/home/wadud/private/CMSSW_9_4_13/src/
+# cmsswDir=/afs/cern.ch/work/m/mwadud/private/naTGC/CMSSW_9_4_13/src/
 workDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/
-# jobsDir=/scratch/mwadud/aNTGC/preSelected/jobs/
-jobsDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
-# writeDir=/scratch/mwadud/aNTGC/preSelected/jobs/
-writeDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
+jobsDir=/scratch/mwadud/aNTGC/preSelected/jobs/
+# jobsDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
+writeDir=/scratch/mwadud/aNTGC/preSelected/jobs/
+# writeDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
 
 jobList=$1
 
@@ -16,7 +16,7 @@ jobList=$1
 
 ############################################################################
 jobflavor=tomorrow
-splitfiles=2
+splitfiles=50
 macroTemplate=${workDir}/macroTemplate.C
 runScriptTemplate=${workDir}/submit_job.sh
 condorCFGtemplate=${workDir}/condor_job.sh
@@ -91,7 +91,10 @@ function preSelectDtaset(){
 	sed -i 's|#jobname|'${jobName}'|g' ${condorCFG}
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
+
+	condir_submit ${condorCFG}
 }
+
 
 while IFS= read -r singleJobFileList
 do
