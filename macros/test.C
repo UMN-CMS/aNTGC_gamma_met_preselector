@@ -1,5 +1,5 @@
 #include "eventPreselector.cc"
 
 void test(){
-	aNTGCpreselector antgc("/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test_files/", "test_out.root");
+	aNTGCpreselector antgc("/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin200_ptmax250_V1.txt", "test_out.root");
 }
