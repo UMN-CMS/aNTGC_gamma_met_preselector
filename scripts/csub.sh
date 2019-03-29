@@ -85,17 +85,17 @@ function preSelectDtaset(){
 	chmod +x ${runScript}
 
 
-	# ### prepare condor script ###
-	# condorCFG=${jobDir}/condor_${jobName}.sh
-	# cp ${condorCFGtemplate} ${condorCFG}
-	# sed -i 's|#script|'${runScript}'|g' ${condorCFG}
-	# sed -i 's|#logDir|'${logDir}'|g' ${condorCFG}
-	# sed -i 's|#jobname|'${jobName}'|g' ${condorCFG}
-	# sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
-	# chmod +x ${condorCFG}
+	### prepare condor script ###
+	condorCFG=${jobDir}/condor_${jobName}.sh
+	cp ${condorCFGtemplate} ${condorCFG}
+	sed -i 's|#script|'${runScript}'|g' ${condorCFG}
+	sed -i 's|#logDir|'${logDir}'|g' ${condorCFG}
+	sed -i 's|#jobname|'${jobName}'|g' ${condorCFG}
+	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
+	chmod +x ${condorCFG}
 
-	# condor_submit ${condorCFG}
-	farmoutAnalysisJobs  --fwklite ${jobName} ${cmsswDir} ${runScript}
+	condor_submit ${condorCFG}
+	# farmoutAnalysisJobs  --fwklite ${jobName} ${cmsswDir} ${runScript}
 }
 
 
