@@ -92,7 +92,7 @@ function preSelectDtaset(){
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
 
-	condir_submit ${condorCFG}
+	condor_submit ${condorCFG}
 }
 
 
