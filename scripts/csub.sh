@@ -3,11 +3,11 @@
 cmsswDir=/afs/hep.wisc.edu/home/wadud/private/CMSSW_9_4_13/src/
 # cmsswDir=/afs/cern.ch/work/m/mwadud/private/naTGC/CMSSW_9_4_13/src/
 workDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/
-# jobsDir=/scratch/mwadud/aNTGC/preSelected/jobs/
+jobsDir=/nfs_scratch/mwadud/aNTGC/preSelected/jobs/
 writeDir=/hdfs/store/user/mwadud/aNTGC/preSelected/
 # jobsDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
 # writeDir=/scratch/mwadud/aNTGC/preSelected/jobs/
-jobsDir=/afs/hep.wisc.edu/home/wadud/private/aNTGC/preSelectorJobs/
+# jobsDir=/afs/hep.wisc.edu/home/wadud/private/aNTGC/preSelectorJobs/
 # writeDir=/afs/cern.ch/work/m/mwadud/private/naTGC/preSelector/test/jobs/
 
 jobList=$1
