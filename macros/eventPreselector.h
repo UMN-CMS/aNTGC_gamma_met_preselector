@@ -309,7 +309,7 @@ private:
 	// var_nAK4CHSJets_in_AK8PuppiJet_1p0{p_nAK4CHSJets_in_AK8PuppiJet_1p0, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.0\\ of\\ ak_{T}^{8}\\ jet"},
 	// var_nAK4CHSJets_in_AK8PuppiJet_0p8{p_nAK4CHSJets_in_AK8PuppiJet_0p8, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<0.8\\ of\\ ak_{T}^{8}\\ jet"},
 	// var_nAK4CHSJets_in_AK8PuppiJet_1p2{p_nAK4CHSJets_in_AK8PuppiJet_1p2, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.2\\ of\\ ak_{T}^{8}\\ jet"},
-	var_nAK4CHSJets_40GeV{p_nAK4CHSJets_40GeV;, 0., 20., 20, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ with\\ p_{T}>40\\ GeV"},
+	var_nAK4CHSJets_40GeV{p_nAK4CHSJets_40GeV, 0., 20., 20, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ with\\ p_{T}>40\\ GeV"},
 	var_deltaR_AK8PuppiJetG{p_deltaR_AK8PuppiJetG, 0., 5., 50, "\\Delta{R}(ak^{8}_{T}\\ jet, \\gamma)"},
 	var_AK8PuppiJet_nb1ecf2_{AK8PuppiJet_nb1ecf2_, 0., 5., 500, "ECF(2,\\beta=1)"},
 	var_AK8PuppiJet_nb1ecf3_{AK8PuppiJet_nb1ecf3_, 0., 5., 500, "ECF(3,\\beta=1)"},
