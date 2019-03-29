@@ -110,6 +110,7 @@ do
 
 	jobBaseName=$(basename "${singleJobFileList}")
 	jobBaseName="${jobBaseName%.*}"
+	jobBaseName=$(echo ${jobBaseName} | tr -cd [:alnum:])
 
 	jobDir=${jobsDir}/${jobBaseName}/
 	if [ -d "${jobDir}" ]; then

@@ -526,8 +526,8 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 
 	// Double counting removal for QCD & GJets
 	if(isGJets || isQCD){
-		Char_t eventHasDirectPromptPho_ = isMC ? _mcHasDirectPromptPho : 0;
-		Bool_t hasDirectPomptPhoBit = getBit(mcHasDirectPromptPho_, 0);
+		Char_t eventHasDirectPromptPho_ = isMC ? (_mcHasDirectPromptPho) : 0;
+		Bool_t hasDirectPomptPhoBit = getBit((eventHasDirectPromptPho_), 0);
 		if(isGJets && !hasDirectPomptPhoBit) return 0;
 		if(isQCD && hasDirectPomptPhoBit) return 0;
 	}
