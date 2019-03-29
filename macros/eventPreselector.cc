@@ -221,9 +221,9 @@ void aNTGCpreselector::setOutputTree(){
 		outTree->Branch("mcHasDirectPromptPho", &mcHasDirectPromptPho_);
 	}
 	outTree->Branch("leptVeto", &leptVeto_);
-	outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_0p8", &p_nAK4CHSJets_in_AK8PuppiJet_0p8);
-	outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_1p0", &p_nAK4CHSJets_in_AK8PuppiJet_1p0);
-	outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_1p2", &p_nAK4CHSJets_in_AK8PuppiJet_1p2);
+	// outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_0p8", &p_nAK4CHSJets_in_AK8PuppiJet_0p8);
+	// outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_1p0", &p_nAK4CHSJets_in_AK8PuppiJet_1p0);
+	// outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_1p2", &p_nAK4CHSJets_in_AK8PuppiJet_1p2);
 
 	outTree->Branch("deltaR_AK8PuppiJetG", &p_deltaR_AK8PuppiJetG);
 	outTree->Branch("phoEta", &phoEta_);
@@ -400,16 +400,15 @@ void aNTGCpreselector::copyEvent(){
 	pfMETPhi_ = _pfMETPhi;
 
 	Int_t _nAk4Jets = _AK4CHSJet_Pt.size();
-	p_nAK4CHSJets_in_AK8PuppiJet_0p8 = 0.;
-	p_nAK4CHSJets_in_AK8PuppiJet_1p0 = 0.;
-	p_nAK4CHSJets_in_AK8PuppiJet_1p2 = 0.;
+	// p_nAK4CHSJets_in_AK8PuppiJet_0p8 = 0.;
+	// p_nAK4CHSJets_in_AK8PuppiJet_1p0 = 0.;
+	// p_nAK4CHSJets_in_AK8PuppiJet_1p2 = 0.;
+
+	p_nAK4CHSJets_40GeV=0.;
+
 
 	for(Int_t i =0; i < _nAk4Jets; i++){
-		Float_t _inConeAK4JetEta =_AK4CHSJet_Eta[i];
-		Float_t _inConeAK4JetPhi =_AK4CHSJet_Phi[i];
-		Float_t _deltaR_ak4_slectedak8 = deltaR(_inConeAK4JetEta, _inConeAK4JetPhi, _selectedAK8JetEta, _selectedAK8JetPhi);
-		if(_deltaR_ak4_slectedak8 > 1.2) continue;
-		AK4CHSJet_deltaR_selectedAK8PuppiJet_.push_back(_deltaR_ak4_slectedak8);
+		if(_AK4CHSJet_Pt[i] < 40.) continue;
 		AK4CHSJet_Pt_.push_back(_AK4CHSJet_Pt[i]);
 		AK4CHSJet_En_.push_back(_AK4CHSJet_En[i]);
 		AK4CHSJet_Eta_.push_back(_AK4CHSJet_Eta[i]);
@@ -417,11 +416,12 @@ void aNTGCpreselector::copyEvent(){
 		AK4CHSJet_ID_.push_back(_AK4CHSJet_ID[i]);
 		AK4CHSJet_PUID_.push_back(_AK4CHSJet_PUID[i]);
 		AK4CHSJet_qgLikelihood_.push_back(_AK4CHSJet_qgLikelihood[i]);
-		if(_AK4CHSJet_Pt[i] > 40.){
-			if(_deltaR_ak4_slectedak8<0.8) p_nAK4CHSJets_in_AK8PuppiJet_0p8++;
-			if(_deltaR_ak4_slectedak8<1.0) p_nAK4CHSJets_in_AK8PuppiJet_1p0++;
-			if(_deltaR_ak4_slectedak8<1.2) p_nAK4CHSJets_in_AK8PuppiJet_1p2++;
-		}
+		p_nAK4CHSJets_40GeV++;
+		// {
+		// 	// if(_deltaR_ak4_slectedak8<0.8) p_nAK4CHSJets_in_AK8PuppiJet_0p8++;
+		// 	// if(_deltaR_ak4_slectedak8<1.0) p_nAK4CHSJets_in_AK8PuppiJet_1p0++;
+		// 	// if(_deltaR_ak4_slectedak8<1.2) p_nAK4CHSJets_in_AK8PuppiJet_1p2++;
+		// }
 	};
 	p_deltaR_AK8PuppiJetG = deltaR(_selectedPhoEta, _selectedPhoPhi, _selectedAK8JetEta, _selectedAK8JetPhi);
 };

@@ -176,9 +176,10 @@ private:
 	ULong64_t HLTPho_;
 	Float_t genWeight_;
 	Char_t mcHasDirectPromptPho_;
-	Float_t p_nAK4CHSJets_in_AK8PuppiJet_0p8;
-	Float_t p_nAK4CHSJets_in_AK8PuppiJet_1p0;
-	Float_t p_nAK4CHSJets_in_AK8PuppiJet_1p2;
+	// Float_t p_nAK4CHSJets_in_AK8PuppiJet_0p8;
+	// Float_t p_nAK4CHSJets_in_AK8PuppiJet_1p0;
+	// Float_t p_nAK4CHSJets_in_AK8PuppiJet_1p2;
+	Float_t p_nAK4CHSJets_40GeV;
 	Float_t p_deltaR_AK8PuppiJetG;
 
 	Float_t phoEta_;
@@ -305,9 +306,10 @@ private:
 	var_AK8PuppiJet_tau32{p_AK8PuppiJet_tau32, 0., 1., 100, "\\tau_{32}(ak^{8}_{T}\\ jet)"},
 	var_AK8PuppiJet_tau43{p_AK8PuppiJet_tau43, 0., 1., 100, "\\tau_{43}(ak^{8}_{T}\\ jet)"},
 	var_AK8PuppiJet_CSVv2{AK8PuppiJet_CSV_, -2., 2., 400, "CSV_{v2}(ak^{8}_{T}\\ jet)"},
-	var_nAK4CHSJets_in_AK8PuppiJet_1p0{p_nAK4CHSJets_in_AK8PuppiJet_1p0, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.0\\ of\\ ak_{T}^{8}\\ jet"},
-	var_nAK4CHSJets_in_AK8PuppiJet_0p8{p_nAK4CHSJets_in_AK8PuppiJet_0p8, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<0.8\\ of\\ ak_{T}^{8}\\ jet"},
-	var_nAK4CHSJets_in_AK8PuppiJet_1p2{p_nAK4CHSJets_in_AK8PuppiJet_1p2, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.2\\ of\\ ak_{T}^{8}\\ jet"},
+	// var_nAK4CHSJets_in_AK8PuppiJet_1p0{p_nAK4CHSJets_in_AK8PuppiJet_1p0, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.0\\ of\\ ak_{T}^{8}\\ jet"},
+	// var_nAK4CHSJets_in_AK8PuppiJet_0p8{p_nAK4CHSJets_in_AK8PuppiJet_0p8, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<0.8\\ of\\ ak_{T}^{8}\\ jet"},
+	// var_nAK4CHSJets_in_AK8PuppiJet_1p2{p_nAK4CHSJets_in_AK8PuppiJet_1p2, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.2\\ of\\ ak_{T}^{8}\\ jet"},
+	var_nAK4CHSJets_40GeV;{Float_t p_nAK4CHSJets_40GeV;, 0., 20., 20, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ with\\ p_{T}>40\\ GeV"},
 	var_deltaR_AK8PuppiJetG{p_deltaR_AK8PuppiJetG, 0., 5., 50, "\\Delta{R}(ak^{8}_{T}\\ jet, \\gamma)"},
 	var_AK8PuppiJet_nb1ecf2_{AK8PuppiJet_nb1ecf2_, 0., 5., 500, "ECF(2,\\beta=1)"},
 	var_AK8PuppiJet_nb1ecf3_{AK8PuppiJet_nb1ecf3_, 0., 5., 500, "ECF(3,\\beta=1)"},
@@ -334,9 +336,10 @@ private:
 		{var_AK8PuppiJet_nb2ecf2_},
 		{var_AK8PuppiJet_nb2ecf3_},
 		{var_AK8PuppiJet_CSVv2},
-		{var_nAK4CHSJets_in_AK8PuppiJet_0p8},
-		{var_nAK4CHSJets_in_AK8PuppiJet_1p0},
-		{var_nAK4CHSJets_in_AK8PuppiJet_1p2},
+		{p_nAK4CHSJets_40GeV},
+		// {var_nAK4CHSJets_in_AK8PuppiJet_0p8},
+		// {var_nAK4CHSJets_in_AK8PuppiJet_1p0},
+		// {var_nAK4CHSJets_in_AK8PuppiJet_1p2},
 		{var_deltaR_AK8PuppiJetG}
 	};
 
@@ -344,7 +347,7 @@ private:
 	std::vector<twoDhistogram_template> boostedJetG_2d_Histograms ={
 		{var_phoCalibEt, var_AK8PuppiJet_Pt},
 		{var_phoCalibEt, var_deltaR_AK8PuppiJetG},
-		{var_AK8PuppiJet_Pt, var_nAK4CHSJets_in_AK8PuppiJet_1p2}
+		{var_AK8PuppiJet_Pt, p_nAK4CHSJets_40GeV}
 	};
 };
 

@@ -17,16 +17,17 @@ splitfiles=50
 macroTemplate=${workDir}/macroTemplate.C
 runScriptTemplate=${workDir}/submit_job.sh
 condorCFGtemplate=${workDir}/condor_job.sh
-ccfilepath=${workDir}/../macros/eventPreselector.cc
-hfilepath=${workDir}/../macros/eventPreselector.h
+ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselector.cc)
+ccfil2epath=$(readlink -e ${workDir}/../macros/extra_tools.cc)
+hfilepath=$(readlink -e ${workDir}/../macros/eventPreselector.h)
 
 current_date_time=$(date +%Y-%m-%d_%H-%M-%S)
 echo $current_date_time;
 
 
-source /cvmfs/cms.cern.ch/cmsset_default.sh;
-cd ${cmsswDir}; eval `scramv1 runtime -sh`; cd -;
-cd ${workDir}
+# source /cvmfs/cms.cern.ch/cmsset_default.sh;
+# cd ${cmsswDir}; eval `scramv1 runtime -sh`; cd -;
+# cd ${workDir}
 
 echo -e "\n\n"
 
@@ -87,16 +88,18 @@ function preSelectDtaset(){
 	sed -i 's|#script|'${runScript}'|g' ${condorCFG}
 	sed -i 's|#logDir|'${logDir}'|g' ${condorCFG}
 	sed -i 's|#jobname|'${jobName}'|g' ${condorCFG}
-	sed -i 's|#ccfile1|'${ccfilepath}'|g' ${condorCFG}
+	sed -i 's|#ccfile1|'${ccfil1epath}'|g' ${condorCFG}
+	sed -i 's|#ccfile2|'${ccfil2epath}'|g' ${condorCFG}
 	sed -i 's|#hfile|'${hfilepath}'|g' ${condorCFG}
-	sed -i 's|#ccfile2|'${rootMacro}'|g' ${condorCFG}
+	sed -i 's|#rootmacro|'${rootMacro}'|g' ${condorCFG}
 	sed -i 's|#filelist|'${fileListPath}'|g' ${condorCFG}
 	sed -i 's|#outfile|'${outFile}'|g' ${condorCFG}
-	sed -i 's|#outdir|'${writeOutDir}'|g' ${condorCFG}
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
 
+	cd ${jobDir}
 	condor_submit ${condorCFG}
+	cd ${workDir}
 #	farmoutAnalysisJobs  --fwklite --infer-cmssw-path antgc  ${runScript}
 }
 
