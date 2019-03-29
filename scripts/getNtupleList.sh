@@ -8,7 +8,7 @@ function listNtuples(){
 	WriteDir=$2
 	outfile=${WriteDir}/${SearchPath##*/}.txt
 
-	find ${path} -type f -name "*.root" -not -path '*/failed' > ${outfile}
+	find ${path} -name "*.root" -not -path '*/failed/*' -type f
 }
 
 for directory in $(find "${searchPath}" -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -and -not -path '*/xSecs');
