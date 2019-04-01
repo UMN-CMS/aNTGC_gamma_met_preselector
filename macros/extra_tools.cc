@@ -109,6 +109,8 @@ std::vector<std::pair<std::string, std::string>> getBranchList(std::string _tree
 std::vector<std::string> listFilesInDir(std::string _dirPath, std::string _regexStr="", Bool_t _verb=0);
 Bool_t matchRegex(std::string _str,std::string _regexStr);
 std::string getTreeNameInFile(std::string _filePath);
+TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWeightsHistname, std::string _xsecMap, Int_t _nameCol=0, Int_t _xSecCol=2, std::string _suffix="_merged");
+std::string vLookup(std::string _lookupKey, std::string _inFile, Int_t _lookupCol, Int_t _valCol, Bool_t _regex=0);
 
 
 struct JJG_EventClass;
@@ -131,7 +133,7 @@ struct Profile2D;
 class CSVReader;
 
 
-std::map<std::string, Double_t> xsec_unit_map = {
+const std::map<std::string, Double_t> xsec_unit_map = {
 	{"fb", 1.0e-3},
 	{"pb", 1.0},
 	{"nb", 1.0e3}
@@ -593,7 +595,7 @@ std::map<std::string, Double_t> load_xsecs(std::string filepath){
 		std::string signal_name = row[0];
 		Double_t xsec_val = std::stod(row[1]);
 		std::string unit_name = row[3];
-		value_map[signal_name] = xsec_val * xsec_unit_map[unit_name];
+		value_map[signal_name] = xsec_val * xsec_unit_map.at(unit_name);
 	}
 
 	std::cout<<"Xsections [in pb] read from file "<<filepath<<std::endl;
@@ -1328,6 +1330,76 @@ std::string getTreeNameInFile(std::string _filePath){
 	}
 	_testF.Close();
 	return _treeName;
+};
+
+
+
+// 	mergeBins
+// 	Adds histograms for MC samples of the same process produced in different phase space bins
+// 	_fileList : list of root files containing histograms
+// 	_histName : the histogram to be merged
+// 	_xsecMap : CSV file listing samples and cross sections
+// 	root file name is used to look up cross section
+TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWeightsHistname, std::string _xsecMap, Int_t _nameCol, Int_t _xSecCol, std::string _suffix){
+	std::cout<<"Merging histograms with name "<<_histName<<std::endl;
+	std::vector<std::string> _inFiles = getNonemptyLines(_fileList);
+
+	TH1F *_mergedHist = (TH1F*) getHistFromFile(_histName, _inFiles[0]);
+	_mergedHist->Reset("ICESM");
+	_mergedHist->Sumw2();
+	std::string _newName = _mergedHist->GetName();
+	_newName += _suffix;
+	_mergedHist->SetName(_newName.c_str());
+
+	for(const auto & _file : _inFiles){
+		std::string _sampleName = getFileName(_file);
+		_sampleName = findAndReplaceAll(_sampleName, ".root", "");
+
+		TH1F *_sumWHist = (TH1F*) getHistFromFile(_sumWeightsHistname, _file);
+		Double_t _sumW = _sumWHist->GetBinContent(1);
+		_sumWHist->Delete();
+
+		Double_t _xSection = std::stod(vLookup(_sampleName, _xsecMap, _nameCol, _xSecCol));
+
+		TH1F *_binHist = (TH1F*) getHistFromFile(_histName, _file);
+		_binHist->Scale(_xSection/_sumW);
+
+		_mergedHist->Add(_binHist);
+
+		_binHist->Delete();
+
+		std::cout<<"\tAdding "<<_file<<":" << std::endl<<"\txSection = "<<_xSection<<std::endl<<"\tSumW = "<<_sumW<<std::endl;
+	}
+	std::cout<<"\t\tMerged all bins!"<<std::endl;
+
+	return _mergedHist;
+};
+
+
+std::string vLookup(std::string _lookupKey, std::string _inFile, Int_t _lookupCol, Int_t _valCol, Bool_t _regex){
+	CSVReader reader(_inFile);
+	std::vector<std::vector<std::string>> data_matrix = reader.getData();
+
+	Int_t _matchedRow = -999;
+	for(UInt_t i = 0; i < data_matrix.size(); i++){
+		std::string _searchCell = data_matrix[i][_lookupCol];
+
+		if(_regex){
+			if(matchRegex(_searchCell, _lookupKey)){
+				_matchedRow = i;
+				break;
+			}
+		} else{
+			if(_searchCell.find(_lookupKey) != std::string::npos) {
+				_matchedRow = i;
+				break;
+			}
+		}
+		if(_matchedRow>-1) break;
+	}
+	if(_matchedRow < 0) return "";
+
+	return data_matrix[_matchedRow][_valCol];
 };
 
 #endif
