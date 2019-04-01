@@ -1,5 +1,5 @@
 #include "eventPreselector.cc"
 
 void test(){
-	aNTGCpreselector antgc("/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin200_ptmax250_V1.txt", "test_out.root");
+	aNTGCpreselector antgc("SinglePhoton_Run2017B-17Nov2017-v1_MINIAOD.txt", "test_data.root");
 }

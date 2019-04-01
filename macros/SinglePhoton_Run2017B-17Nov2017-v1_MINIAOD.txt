@@ -1,0 +1,3 @@
+/hdfs/store/user/shilpi/aNTGC/ggNtuplizerSkim/SinglePhoton/crab_SinglePhoton_Run2017B-17Nov2017-v1_MINIAOD/190321_145409/0000/anTGCtree_data_1.root
+/hdfs/store/user/shilpi/aNTGC/ggNtuplizerSkim/SinglePhoton/crab_SinglePhoton_Run2017B-17Nov2017-v1_MINIAOD/190321_145409/0000/anTGCtree_data_10.root
+/hdfs/store/user/shilpi/aNTGC/ggNtuplizerSkim/SinglePhoton/crab_SinglePhoton_Run2017B-17Nov2017-v1_MINIAOD/190321_145409/0000/anTGCtree_data_100.root
