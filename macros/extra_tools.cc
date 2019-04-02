@@ -74,6 +74,7 @@ std::vector<std::string> getLinesRegex(std::string _filepath, std::string _regex
 TH1* getHistFromFile(std::string _histName, std::string _filename);
 TObject *getObjectFromFile(std::string _objectName, std::string _filename);
 TH1* rebinHist(TH1* _hist, Double_t _statUnc);
+TH1* rebinHist(TH1* _hist, std::vector<Double_t> _newBins);
 std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc);
 Double_t sumNextNbins(TH1* _hist, UInt_t _n, UInt_t _curr);
 void copyHistAtts(TH1* _source, TH1* _mock);
@@ -111,6 +112,8 @@ Bool_t matchRegex(std::string _str,std::string _regexStr);
 std::string getTreeNameInFile(std::string _filePath);
 TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWeightsHistname, std::string _xsecMap, Int_t _nameCol=0, Int_t _xSecCol=2, std::string _suffix="_merged");
 std::string vLookup(std::string _lookupKey, std::string _inFile, Int_t _lookupCol, Int_t _valCol, Bool_t _regex=0);
+Bool_t isROOTfile(std::string _filepath);
+std::vector<Float_t> getXlimits(std::vector<TH1*> _hists, Float_t _binThreshold=0.);
 
 
 struct JJG_EventClass;
@@ -129,6 +132,7 @@ struct BinCollection;
 struct signal_atts;
 struct sample;
 struct Profile2D;
+struct parseOptions;
 
 class CSVReader;
 
@@ -437,7 +441,8 @@ struct signal_atts {
 
 struct sample {
 
-	sample(std::string _ntuple, std::string _legend = "", Int_t _marker = 20, std::string _color = "#252525", Bool_t _drawLine = 0, TFile *_file = NULL) : ntuple(_ntuple), legend(_legend), marker(_marker), color(_color), drawLine(_drawLine), file(_file) {
+	sample(std::string _ntuple, std::string _legend = "", Int_t _marker = 20, std::string _color = "#252525", Bool_t _drawLine = 0, TFile *_file = NULL, Float_t _luminosity=-999) {
+		set(_ntuple, _legend, _marker, _color, _drawLine,_file, _luminosity);
 	}
 
 	sample() {
@@ -448,6 +453,32 @@ struct sample {
 	std::string color;
 	Bool_t drawLine = 0;
 	TFile *file;
+	Float_t luminosity = 0.;
+
+	void set(std::string _ntuple, std::string _legend = "", Int_t _marker = 20, std::string _color = "#252525", Bool_t _drawLine = 0, TFile *_file = NULL, Float_t _luminosity=-999){
+		ntuple= _ntuple;
+		legend = _legend;
+		marker = _marker;
+		color = _color;
+		drawLine = _drawLine;
+		file = _file;
+		luminosity = _luminosity;
+	};
+
+	void assignAtt(TH1 *_hist, Float_t _markerSize=1.5, Float_t _lineWidth=2.){
+		if(marker>0){
+			_hist->SetMarkerStyle(marker);
+			_hist->SetMarkerSize(_markerSize);
+			_hist->SetMarkerColor(TColor::GetColor(color.c_str()));
+			_hist->SetLineColor(TColor::GetColor(color.c_str()));
+			_hist->SetLineWidth(_lineWidth);
+		} else{
+			_hist->SetFillStyle((-marker));
+			_hist->SetFillColor(TColor::GetColor(color.c_str()));
+			_hist->SetLineColor(TColor::GetColor(color.c_str()));
+		}
+
+	};
 };
 
 
@@ -526,6 +557,46 @@ public:
 		file.close();
 
 		return dataList;
+	};
+};
+
+
+struct parseOptions {
+
+	std::string optFile;
+	std::map<std::string, std::string> optMap;
+
+	parseOptions(std::string _optFile): optFile(_optFile){
+		parseIt(optFile);
+
+	};
+
+	parseOptions(){};
+
+	void parseIt(std::string _optFile){
+		std::cout<<"\t\tOptions parsed from file "<<_optFile<<"... ";
+		CSVReader _csvFile(_optFile);
+		std::vector<std::vector<std::string>> _data = _csvFile.getData();
+
+		for(Int_t i = 0; i < _data.size(); i++){
+			std::string _optName = _data[i][0];
+			if(_optName.empty()) continue;
+			std::string _optVal = _data[i][1];
+			optMap[_optName] = _optVal;
+		}
+		std::cout<<" parsed!"<<std::endl;
+	};
+
+	Float_t getFloat(std::string _opt){
+		return std::stof(optMap.at(_opt));
+	};
+
+	Int_t getInt(std::string _opt){
+		return std::stoi(optMap.at(_opt));
+	};
+
+	std::string get(std::string _opt){
+		return optMap.at(_opt);
 	};
 };
 
@@ -809,6 +880,14 @@ TH1* rebinHist(TH1* _hist, Double_t _statUnc){
 	TH1* _rebinnedHist = (TH1*) _hist->Rebin(_goodBins.size()-1, _newname.c_str(), _goodBins.data());
 	_rebinnedHist->Scale(1,"width");
 	return _rebinnedHist;
+};
+
+
+TH1* rebinHist(TH1* _hist, std::vector<Double_t> _newBins){
+	std::string _newname = "rebinned_" + (std::string)_hist->GetName();
+	TH1 *_hist_rebinned = (TH1*) _hist->Rebin(_newBins.size()-1, _newname.c_str(), _newBins.data());
+	_hist->Delete();
+	return _hist_rebinned;
 };
 
 
@@ -1341,15 +1420,19 @@ std::string getTreeNameInFile(std::string _filePath){
 // 	_xsecMap : CSV file listing samples and cross sections
 // 	root file name is used to look up cross section
 TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWeightsHistname, std::string _xsecMap, Int_t _nameCol, Int_t _xSecCol, std::string _suffix){
-	std::cout<<"Merging histograms with name "<<_histName<<std::endl;
-	std::vector<std::string> _inFiles = getNonemptyLines(_fileList);
+	std::cout<<"Merging histograms with name "<<_histName<<" using file list "<< _fileList<<std::endl;
+	std::vector<std::string> _inFiles;
+	if(!isROOTfile(_fileList))_inFiles = getNonemptyLines(_fileList);
+	else _inFiles = {_fileList};
 
 	TH1F *_mergedHist = (TH1F*) getHistFromFile(_histName, _inFiles[0]);
 	_mergedHist->Reset("ICESM");
+	_mergedHist->SetDirectory(0);
 	_mergedHist->Sumw2();
 	std::string _newName = _mergedHist->GetName();
 	_newName += _suffix;
 	_mergedHist->SetName(_newName.c_str());
+
 
 	for(const auto & _file : _inFiles){
 		std::string _sampleName = getFileName(_file);
@@ -1370,7 +1453,7 @@ TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWe
 
 		std::cout<<"\tAdding "<<_file<<":" << std::endl<<"\txSection = "<<_xSection<<std::endl<<"\tSumW = "<<_sumW<<std::endl;
 	}
-	std::cout<<"\t\tMerged all bins!"<<std::endl;
+	std::cout<<"\t\tMerged all bins! Integral = "<<_mergedHist->Integral()<<std::endl;
 
 	return _mergedHist;
 };
@@ -1400,6 +1483,36 @@ std::string vLookup(std::string _lookupKey, std::string _inFile, Int_t _lookupCo
 	if(_matchedRow < 0) return "";
 
 	return data_matrix[_matchedRow][_valCol];
+};
+
+
+Bool_t isROOTfile(std::string _filepath){
+	if(!file_exists(_filepath)){
+		return 0;
+	}
+	if(_filepath.substr(_filepath.find_last_of(".") + 1) == "root"){
+		if(TFile(_filepath.c_str()).GetListOfKeys() == nullptr){
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
+};
+
+
+std::vector<Float_t> getXlimits(std::vector<TH1*> _hists, Float_t _binThreshold){
+	std::vector<Float_t> _limits;
+	for(auto _hist: _hists){
+		Double_t first = _hist->GetXaxis()->GetBinLowEdge(_hist->FindFirstBinAbove(_binThreshold, 1));
+		Double_t last = _hist->GetXaxis()->GetBinUpEdge(_hist->FindLastBinAbove(_binThreshold, 1));
+		_limits.push_back(first);
+		_limits.push_back(last);
+	}
+
+	std::vector<Float_t> _max_min;
+	_max_min.push_back(*std::max_element(_limits.begin(), _limits.end()));
+	_max_min.push_back(*std::min_element(_limits.begin(), _limits.end()));
+	return _max_min;
 };
 
 #endif

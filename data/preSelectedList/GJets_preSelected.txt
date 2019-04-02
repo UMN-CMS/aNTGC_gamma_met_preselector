@@ -1,0 +1,6 @@
+../out/GJetsHT200To400TuneCP513TeVmadgraphMLMpythia8.root
+../out/GJetsHT600ToInfTuneCP513TeVmadgraphMLMpythia8.root
+../out/GJetsHT100To200TuneCP513TeVmadgraphMLMpythia8.root
+../out/GJetsHT400To600TuneCP513TeVmadgraphMLMpythia8.root
+../out/TTGJetsTuneCP513TeVamcatnloFXFXmadspinpythia8.root
+../out/GJetsHT40To100TuneCP513TeVmadgraphMLMpythia8.root
