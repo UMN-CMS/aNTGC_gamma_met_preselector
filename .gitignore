@@ -2,5 +2,6 @@
 *.pcm
 *.pyc
 *.so
+*.root
 test/
 test_files/
