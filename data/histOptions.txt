@@ -40,3 +40,4 @@ errorBandFillStyle,3005
 dataMarkerStyle,21
 ratioPlotYtitle,Data/MC
 rebinStatUnc,0.05
+luminosity,40000.

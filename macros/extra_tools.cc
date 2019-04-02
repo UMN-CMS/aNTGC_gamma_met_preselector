@@ -1451,7 +1451,7 @@ TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWe
 
 		_binHist->Delete();
 
-		std::cout<<"\tAdding "<<_file<<":" << std::endl<<"\txSection = "<<_xSection<<std::endl<<"\tSumW = "<<_sumW<<std::endl;
+		std::cout<<"\t\tAdding "<<_file<<":" << std::endl<<"\t\t\txSection = "<<_xSection<<std::endl<<"\t\t\tSumW = "<<_sumW<<std::endl;
 	}
 	std::cout<<"\t\tMerged all bins! Integral = "<<_mergedHist->Integral()<<std::endl;
 

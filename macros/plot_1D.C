@@ -47,6 +47,7 @@ TCanvas *plotHist(std::string _histName){
 	canvas->cd();
 	pad1->Draw();
 	pad1->SetGrid(1,1);
+	pad1->SetLogy();
 
 	TH1F *dataHist = (TH1F*) getHistFromFile(_histName, DATA.ntuple);
 	DATA.assignAtt(dataHist, histOpts.getInt("markerSize"), histOpts.getFloat("linewidth"));
@@ -67,6 +68,7 @@ TCanvas *plotHist(std::string _histName){
 			y_axis_title =  bgHist->GetYaxis()->GetTitle();
 		}
 		bgHist = (TH1F*) rebinHist(bgHist, newBins);
+		bgHist->Scale(histOpts.getFloat("luminosity"));
 		BACKGROUNDS[i].assignAtt(bgHist);
 		legend->AddEntry(bgHist, BACKGROUNDS[i].legend.c_str(), "FL");
 		bgHistStack->Add(bgHist, "HIST ][");
@@ -92,6 +94,7 @@ TCanvas *plotHist(std::string _histName){
 	for(auto & signal : SIGNALS){
 		TH1F *signalHist = (TH1F*) mergeBins(signal.ntuple, _histName, "sumGenWeights", histOpts.get("xSectionMap"), 0, 1,"_merged");
 		signalHist = (TH1F*) rebinHist(signalHist, newBins);
+		signalHist->Scale(histOpts.getFloat("luminosity"));
 		signal.assignAtt(signalHist, histOpts.getFloat("linewidth"));
 		legend->AddEntry(signalHist, signal.legend.c_str(), "L");
 		pad1->cd();
@@ -134,7 +137,7 @@ TCanvas *plotHist(std::string _histName){
 	dataOverMC->GetXaxis()->SetTitleOffset(histOpts.getFloat("xtitleoffset") * histOpts.getFloat("pad2SF"));
 	dataOverMC->GetXaxis()->SetLabelSize(histOpts.getFloat("pad2SF")*histOpts.getFloat("axislabelsize"));
 	dataOverMC->GetYaxis()->SetTitle(histOpts.get("ratioPlotYtitle").c_str());
-	dataOverMC->GetYaxis()->SetTitleSize(histOpts.getFloat("axistitlesize"));
+	dataOverMC->GetYaxis()->SetTitleSize(histOpts.getFloat("pad2SF") * histOpts.getFloat("axistitlesize"));
 	dataOverMC->GetXaxis()->SetTitleOffset(histOpts.getFloat("xtitleoffset") / histOpts.getFloat("pad2SF"));
 	dataOverMC->GetYaxis()->SetLabelSize(histOpts.getFloat("pad2SF")*histOpts.getFloat("axislabelsize"));
 
@@ -154,6 +157,14 @@ TCanvas *plotHist(std::string _histName){
 	pad0->cd();
 	legend->Draw();
 
+	gPad->RedrawAxis();
+	gPad->RedrawAxis("g");
+	gPad->Update();
+
+	canvas->RedrawAxis();
+	canvas->Update();
+	canvas->Modified();
+
 	std::cout<<"\t\tComplete drawing TH1F "<<_histName<<std::endl;
 
 	return canvas;
@@ -161,7 +172,7 @@ TCanvas *plotHist(std::string _histName){
 
 
 void plot_1D(){
-	gROOT->SetBatch();
+	// gROOT->SetBatch();
 
 	std::cout<<"Begin plotting program..."<<std::endl;
 
