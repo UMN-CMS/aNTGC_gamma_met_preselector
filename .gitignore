@@ -2,7 +2,7 @@
 *.pcm
 *.pyc
 *.so
-*.root
+#*.root
 test/
-out/
+#out/
 test_files/
