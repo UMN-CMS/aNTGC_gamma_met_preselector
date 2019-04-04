@@ -90,6 +90,7 @@ template <typename T>
 std::string to_string_with_precision(const T a_value, const int n = 6);
 std::string getUnit(TH1* _hist);
 std::string getUnit(std::string ystring);
+std::string eraseUnit(std::string ystring);
 std::string first_numberstring(std::string const & str);
 std::vector<Double_t> getXbins(TH1 *hist);
 void closeTChain(TChain *_chain);
@@ -114,7 +115,8 @@ TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWe
 std::string vLookup(std::string _lookupKey, std::string _inFile, Int_t _lookupCol, Int_t _valCol, Bool_t _regex=0);
 Bool_t isROOTfile(std::string _filepath);
 std::vector<Float_t> getXlimits(std::vector<TH1*> _hists, Float_t _binThreshold=0.);
-
+void clearStack();
+Double_t weightedYmean(TH1 *_hist);
 
 struct JJG_EventClass;
 template <typename anytype>
@@ -476,6 +478,7 @@ struct sample {
 			_hist->SetFillStyle((-marker));
 			_hist->SetFillColor(TColor::GetColor(color.c_str()));
 			_hist->SetLineColor(TColor::GetColor(color.c_str()));
+			_hist->SetLineWidth(_lineWidth);
 		}
 
 	};
@@ -908,7 +911,8 @@ std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc){
 		if(_bincontent != _bincontent) return {};
 		Double_t _binUpedge = _hist->GetXaxis()->GetBinUpEdge(i);
 		Double_t _binLowedge = _hist->GetXaxis()->GetBinLowEdge(i);
-		if((_next10bincontent == 0. && i < _nBins) || (i <=_first50pcBins && _bincontent == 0.)){
+		//(i <=_first50pcBins && _bincontent == 0.)
+		if((_next10bincontent == 0. && i < _nBins) || (_bincontent == 0.)){
 			if(good_bins.size()>0) {
 				Double_t _lastElement = good_bins.back();
 				if(_binLowedge -_lastElement > 0.00000001) good_bins.push_back(_binLowedge);
@@ -1023,6 +1027,15 @@ std::string getUnit(std::string ystring){
 	if(unit_text.empty()) return std::to_string(1);
 	else return unit_text;
 };
+
+
+std::string eraseUnit(std::string ystring){
+	size_t lastSlash = ystring.find_last_of("/");
+	if(lastSlash == std::string::npos) return ystring;
+	std::string _unit = ystring.substr(lastSlash);
+	boost::replace_all(ystring, _unit, "");
+	return ystring;
+}
 
 
 std::string first_numberstring(std::string const & str){
@@ -1420,10 +1433,12 @@ std::string getTreeNameInFile(std::string _filePath){
 // 	_xsecMap : CSV file listing samples and cross sections
 // 	root file name is used to look up cross section
 TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWeightsHistname, std::string _xsecMap, Int_t _nameCol, Int_t _xSecCol, std::string _suffix){
-	std::cout<<"Merging histograms with name "<<_histName<<" using file list "<< _fileList<<std::endl;
+	std::cout<<"Merging TH1F "<<_histName<<" using file list "<< _fileList<<std::endl;
 	std::vector<std::string> _inFiles;
 	if(!isROOTfile(_fileList))_inFiles = getNonemptyLines(_fileList);
 	else _inFiles = {_fileList};
+
+	std::sort(_inFiles.begin(), _inFiles.end());
 
 	TH1F *_mergedHist = (TH1F*) getHistFromFile(_histName, _inFiles[0]);
 	_mergedHist->Reset("ICESM");
@@ -1503,8 +1518,8 @@ Bool_t isROOTfile(std::string _filepath){
 std::vector<Float_t> getXlimits(std::vector<TH1*> _hists, Float_t _binThreshold){
 	std::vector<Float_t> _limits;
 	for(auto _hist: _hists){
-		Double_t first = _hist->GetXaxis()->GetBinLowEdge(_hist->FindFirstBinAbove(_binThreshold, 1));
-		Double_t last = _hist->GetXaxis()->GetBinUpEdge(_hist->FindLastBinAbove(_binThreshold, 1));
+		Double_t first = _hist->GetXaxis()->GetBinLowEdge(_hist->FindFirstBinAbove(_binThreshold));
+		Double_t last = _hist->GetXaxis()->GetBinUpEdge(_hist->FindLastBinAbove(_binThreshold));
 		_limits.push_back(first);
 		_limits.push_back(last);
 	}
@@ -1513,6 +1528,46 @@ std::vector<Float_t> getXlimits(std::vector<TH1*> _hists, Float_t _binThreshold)
 	_max_min.push_back(*std::max_element(_limits.begin(), _limits.end()));
 	_max_min.push_back(*std::min_element(_limits.begin(), _limits.end()));
 	return _max_min;
+};
+
+
+void clearStack(){
+	TList* obList = gDirectory->GetList();
+	for(auto obj : *obList){
+		obj->Delete();
+	}
+};
+
+
+Double_t weightedYmean(TH1 *_hist){
+	Double_t _weightedSumY = 0.;
+	Double_t _weightSum = 0.;
+	for(Int_t i = 0; i < _hist->GetNbinsX(); i++){
+		if(!(_hist->GetBinContent(i) > 0.)) continue;
+		// if(!(_hist->GetBinError(i) > 0.)) continue;
+		// Double_t _binWeight = 1./(_hist->GetBinError(i) * _hist->GetBinError(i));
+		Double_t _binWeight = 1.;
+		_weightSum += _binWeight;
+		_weightedSumY += _binWeight * _hist->GetBinContent(i);
+	}
+	return (_weightedSumY/_weightSum);
+};
+
+
+Double_t weightedYspread(TH1 *_hist){
+	Double_t _weightedSumDeltaY2 = 0.;
+	Double_t _weightSum = 0.;
+	Double_t _weightedYmean = weightedYmean(_hist);
+
+	for(Int_t i = 0; i < _hist->GetNbinsX(); i++){
+		if(!(_hist->GetBinContent(i) > 0.)) continue;
+		// if(!(_hist->GetBinError(i) > 0.)) continue;
+		// Double_t _binWeight = 1./(_hist->GetBinError(i) * _hist->GetBinError(i));
+		Double_t _binWeight = 1.;
+		_weightSum += _binWeight;
+		_weightedSumDeltaY2 += _binWeight * (_hist->GetBinContent(i) - _weightedYmean) * (_hist->GetBinContent(i) - _weightedYmean);
+	}
+	return (_weightedSumDeltaY2/_weightSum);
 };
 
 #endif
