@@ -1,5 +1,5 @@
-GJets,/scratch/mwadud/anTGCpreselector/data/preSelectedList/GJets_preSelected.txt
-QCD,/scratch/mwadud/anTGCpreselector/data/preSelectedList/QCD_preSelected.txt
+GJets,/scratch/mwadud/anTGCpreselector/data/preSelectedList/GJets_noDCremoval.txt
+QCD,/scratch/mwadud/anTGCpreselector/data/preSelectedList/QCD_noDCremoval.txt
 aNTGCjjgloh3z0sm,/scratch/mwadud/anTGCpreselector/data/preSelectedList/aNTGCjjgloh3z0_preSelected.txt
 aNTGCjjgloh3z0p0003,/scratch/mwadud/anTGCpreselector/data/preSelectedList/aNTGCjjgloh3z0p0003_preSelected.txt
 aNTGCjjgloh3z0p0005,/scratch/mwadud/anTGCpreselector/data/preSelectedList/aNTGCjjgloh3z0p0005_preSelected.txt

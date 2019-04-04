@@ -5,6 +5,35 @@
 #include "TSystem.h"
 
 
+Bool_t aNTGCpreselector::phoIsDirectPromptDeltaR0p05(){
+	Int_t _nMC = _mcStatus.size();
+	for(Int_t i= 0; i < _nMC; i++){
+		if(((_mcPID[i]) == 22) && ((_mcStatus[i]) == 1) && ((std::abs((_mcMomPID[i])) <= 22) || (std::abs((_mcMomPID[i])) == 2212))){
+			for(Int_t j =0; j < _nMC; j++){
+				if((_mcPID[j]) == 21 || std::abs((_mcPID[j])) < 7){
+					Float_t _deltaR = deltaR(_mcEta[i], _mcPhi[i], _mcEta[j], _mcPhi[j]);
+					if(_deltaR > 0.05) return 1;
+				}
+			}
+		}
+	}
+	return 0;
+};
+
+Bool_t aNTGCpreselector::phoIsDirectPromptDeltaR0p4(){
+	Int_t _nMC = _mcStatus.size();
+	for(Int_t i= 0; i < _nMC; i++){
+		if(((_mcPID[i]) == 22) && ((_mcStatus[i]) == 1) && ((std::abs((_mcMomPID[i])) <= 22) || (std::abs((_mcMomPID[i])) == 2212))){
+			for(Int_t j =0; j < _nMC; j++){
+				if((_mcPID[j]) == 21 || std::abs((_mcPID[j])) < 7){
+					Float_t _deltaR = deltaR(_mcEta[i], _mcPhi[i], _mcEta[j], _mcPhi[j]);
+					if(_deltaR > 0.4) return 1;
+				}
+			}
+		}
+	}
+	return 0;
+};
 
 aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_file){
 	Char_t _isData =isData(_file_list);
@@ -23,7 +52,7 @@ aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_f
 	}
 
 	isQCD = matchRegex(_file_list, ".*QCD.*");
-	isGJets = matchRegex(_file_list, ".*GJets.*");
+	isGJets = (matchRegex(_file_list, ".*GJets.*") && !matchRegex(_file_list, ".*TGJets.*"));
 
 	if(!inputTree){
 		std::cout<<"Error! Could not create input TChain."<<std::endl;
@@ -83,6 +112,11 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 	if(isMC){
 		_genWeight.set(inputTTreeReader, "genWeight");
 		_mcHasDirectPromptPho.set(inputTTreeReader, "mcHasDirectPromptPho");
+		_mcStatus.set(inputTTreeReader, "mcStatus");
+		_mcPID.set(inputTTreeReader, "mcPID");
+		_mcMomPID.set(inputTTreeReader, "mcMomPID");
+		_mcEta.set(inputTTreeReader, "mcEta");
+		_mcPhi.set(inputTTreeReader, "mcPhi");
 	}
 
 	_pfMET.set(inputTTreeReader, "pfMET");
@@ -524,13 +558,13 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 	lastCutStep = 0.5;
 	registerCutFlow();
 
-	// Double counting removal for QCD & GJets
-	if(isGJets || isQCD){
-		Char_t eventHasDirectPromptPho_ = isMC ? (_mcHasDirectPromptPho) : 0;
-		Bool_t hasDirectPomptPhoBit = getBit((eventHasDirectPromptPho_), 0);
-		if(isGJets && !hasDirectPomptPhoBit) return 0;
-		if(isQCD && hasDirectPomptPhoBit) return 0;
-	}
+	//Double counting removal for QCD & GJets
+	//if(isGJets || isQCD){
+		// Char_t eventHasDirectPromptPho_ = isMC ? (_mcHasDirectPromptPho) : 0;
+		// Bool_t hasDirectPomptPhoBit = getBit((eventHasDirectPromptPho_), 0);
+	//	if(isGJets && !phoIsDirectPromptDeltaR0p05()) return 0;
+	//	if(isQCD && phoIsDirectPromptDeltaR0p4() ) return 0;
+	//	}
 	registerCutFlow();
 
 	// 200GeV photon trigger

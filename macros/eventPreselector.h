@@ -34,6 +34,8 @@ private:
 	Bool_t selectBoostedJetGevent();
 	void analyze();
 	void registerCutFlow();
+	Bool_t phoIsDirectPromptDeltaR0p05();
+	Bool_t phoIsDirectPromptDeltaR0p4();
 	Float_t lastCutStep = 0.5;
 	TH1F h_cutFlowEvts{"cutFlowEvts", "Cut Flow (# of events)", 20, 0., 20.};
 	TH1F h_cutFlowWeighted{"cutFlow", "Cut Flow", 20, 0., 20.};
@@ -61,6 +63,12 @@ private:
 
 	TTreeReaderAnyValue<Float_t> _genWeight;
 	TTreeReaderAnyValue<Char_t> _mcHasDirectPromptPho;
+
+	TTreeReaderVectorValue<Int_t> _mcStatus;
+	TTreeReaderVectorValue<Int_t> _mcPID;
+	TTreeReaderVectorValue<Int_t> _mcMomPID;
+	TTreeReaderVectorValue<Float_t> _mcEta;
+	TTreeReaderVectorValue<Float_t> _mcPhi;
 
 
 	TTreeReaderAnyValue<Float_t> _pfMET;

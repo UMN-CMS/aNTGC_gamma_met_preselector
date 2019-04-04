@@ -71,7 +71,7 @@ std::string getFileName(std::string _filepath);
 std::vector<std::string> getNonemptyLines(std::string filepath);
 std::vector<std::string> getNonemptyLinesWithFilenameKeyword(std::string filepath, std::string keyword, std::string exclude="");
 std::vector<std::string> getLinesRegex(std::string _filepath, std::string _regexStr);
-TH1* getHistFromFile(std::string _histName, std::string _filename);
+TH1* getHistFromFile(std::string _histName, std::string _filename, Bool_t _verbose=0);
 TObject *getObjectFromFile(std::string _objectName, std::string _filename);
 TH1* rebinHist(TH1* _hist, Double_t _statUnc);
 TH1* rebinHist(TH1* _hist, std::vector<Double_t> _newBins);
@@ -852,12 +852,12 @@ std::vector<std::string> getLinesRegex(std::string _filepath, std::string _regex
 };
 
 
-TH1* getHistFromFile(std::string _histName, std::string _filename){
+TH1* getHistFromFile(std::string _histName, std::string _filename, Bool_t _verbose){
 	TFile _file(_filename.c_str(), "READ");
 	TH1* _hist = (TH1*) _file.Get(_histName.c_str());
 	_hist->SetDirectory(0);
 	_file.Close();
-	std::cout<<"\t\tLoaded histogram "<<_histName<<" from file "<<_filename<<std::endl;
+	if(_verbose)std::cout<<"\t\tLoaded histogram "<<_histName<<" from file "<<_filename<<std::endl;
 	return _hist;
 };
 
@@ -1443,7 +1443,7 @@ TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWe
 	TH1F *_mergedHist = (TH1F*) getHistFromFile(_histName, _inFiles[0]);
 	_mergedHist->Reset("ICESM");
 	_mergedHist->SetDirectory(0);
-	_mergedHist->Sumw2();
+	// _mergedHist->Sumw2();
 	std::string _newName = _mergedHist->GetName();
 	_newName += _suffix;
 	_mergedHist->SetName(_newName.c_str());
@@ -1466,7 +1466,7 @@ TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWe
 
 		_binHist->Delete();
 
-		std::cout<<"\t\tAdding "<<_file<<":" << std::endl<<"\t\t\txSection = "<<_xSection<<std::endl<<"\t\t\tSumW = "<<_sumW<<std::endl;
+		std::cout<<"\t\t"<<_file<<":\t xSection = "<<_xSection<<"\t\tSumW = "<<_sumW<<std::endl;
 	}
 	std::cout<<"\t\tMerged all bins! Integral = "<<_mergedHist->Integral()<<std::endl;
 
@@ -1488,7 +1488,7 @@ std::string vLookup(std::string _lookupKey, std::string _inFile, Int_t _lookupCo
 				break;
 			}
 		} else{
-			if(_searchCell.find(_lookupKey) != std::string::npos) {
+			if(_searchCell == _lookupKey) {
 				_matchedRow = i;
 				break;
 			}

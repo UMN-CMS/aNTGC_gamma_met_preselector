@@ -20,7 +20,10 @@ function mergeFilesInDir(){
 searchPath=$1
 outDir=$2
 
-for directory in $(find "${searchPath}" -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -and -not -path '*/xSecs');
+echo "start"
+# for directory in $(find "${searchPath}" -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -and -not -path '*/xSecs');
+for directory in $(find "${searchPath}" -maxdepth 1 -mindepth 1 -type d);
 do
+	echo $${directory}
 	mergeFilesInDir ${directory} ${outDir}
 done
