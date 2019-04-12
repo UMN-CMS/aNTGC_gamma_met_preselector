@@ -558,18 +558,20 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 	lastCutStep = 0.5;
 	registerCutFlow();
 
-	//Double counting removal for QCD & GJets
-	//if(isGJets || isQCD){
-		// Char_t eventHasDirectPromptPho_ = isMC ? (_mcHasDirectPromptPho) : 0;
-		// Bool_t hasDirectPomptPhoBit = getBit((eventHasDirectPromptPho_), 0);
-	//	if(isGJets && !phoIsDirectPromptDeltaR0p05()) return 0;
-	//	if(isQCD && phoIsDirectPromptDeltaR0p4() ) return 0;
-	//	}
+	// Double counting removal for QCD & GJets
+	if(isGJets || isQCD){
+		Char_t eventHasDirectPromptPho_ = isMC ? (_mcHasDirectPromptPho) : 0;
+		Bool_t hasDirectPomptPhoBit = getBit((eventHasDirectPromptPho_), 0);
+		// if(isGJets && !phoIsDirectPromptDeltaR0p05()) return 0;
+		// if(isQCD && phoIsDirectPromptDeltaR0p4() ) return 0;
+		if(isGJets && !hasDirectPomptPhoBit) return 0;
+		if(isQCD && hasDirectPomptPhoBit ) return 0;
+	}
 	registerCutFlow();
 
 	// 200GeV photon trigger
 	ULong64_t photTriggers = _HLTPho;
-	if(!getBit(photTriggers, 9)) return 0;
+	if(!getBit(photTriggers, 9)) return 0;// 9 = 200GeV, 11 = 300GeV
 	registerCutFlow();
 
 
@@ -601,7 +603,7 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 		if(_candPhoAbsEta > 2.5 ) continue;
 		if((_candPhoAbsEta > BETRetaMin) && (_candPhoAbsEta < BETRetaMax)) continue;
 		UChar_t _phoID = _phoIDbit[i];
-		if(!getBit(_phoID, 4)) continue;
+		if(!getBit(_phoID, 3)) continue;
 		Int_t _phoPassEleVeto = _phoEleVeto[i];
 		if(_phoPassEleVeto<1) continue;
 		_220GeVphoCounter++;
@@ -615,8 +617,8 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 
 
 	// Not more than one candidate photon
-	if(_220GeVphoCounter > 1) return 0;
-	registerCutFlow();
+//	if(_220GeVphoCounter > 1) return 0;
+//	registerCutFlow();
 
 
 	// Get highest pT AK8PuppiJet with dR > 1.0 with photon
@@ -643,8 +645,8 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 
 
 	// Not more than one ak8Jet with pT > 200 GeV
-	if(_200GeVak8JetCounter > 1) return 0;
-	registerCutFlow();
+//	if(_200GeVak8JetCounter > 1) return 0;
+//	registerCutFlow();
 
 
 	// deltaR(photon, ak8puppiJet) > 1.0
@@ -696,7 +698,7 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 			break;
 		}
 	}
-	if(muVeto_ == 0){
+	if(muVeto_ == 0 && eleVeto_ ==0){
 		registerCutFlow();
 	}
 

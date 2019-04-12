@@ -1,0 +1,1 @@
+/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/postSelected/deltaRgt1p8/TTGammaHadronicTuneCP5PSweights13TeVmadgraphpythia8.root

@@ -1,10 +1,11 @@
-writeDir,../out/plots/
-xSectionMap,../data/meanXsections.txt
+writeDir,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/plots/
+xSectionMap,../data/meanXsections_wkFactor.txt
 colName,0
 colXsec,1
 histList,../data/histList.txt
-datasetList,../data/preSelected_list.txt
+datasetList,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval//preSelectedList.txt
 ttSample,TTJetsTuneCP513TeVamcatnloFXFXpythia8
+ttSampleLegend,t#bar{t}+Jets
 binThreshold,0.5
 linewidth,6.
 markerSize,2

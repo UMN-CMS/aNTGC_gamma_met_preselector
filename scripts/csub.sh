@@ -1,9 +1,11 @@
 #!/bin/bash
 
+### syntax:  bash csub.sh [path_to_ntuple_lists]  [write_directory]
+
 cmsswDir=/hdfs/store/user/mwadud/CMSSW_9_4_13/src/
 workDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/
-writeDir=/scratch/mwadud/preSelected/jobs/
-jobsDir=/scratch/mwadud/preSelected/jobs/
+writeDir=$2
+jobsDir=$2
 
 jobList=$1
 
@@ -103,6 +105,11 @@ function preSelectDtaset(){
 #	farmoutAnalysisJobs  --fwklite --infer-cmssw-path antgc  ${runScript}
 }
 
+mkdir -p ${writeDir}
+ccfilename=$(basename "${ccfil1epath}")
+cp ${ccfil1epath} ${writeDir}/${ccfilename}
+
+ccfil1epath=${writeDir}/${ccfilename}
 
 while IFS= read -r singleJobFileList
 do

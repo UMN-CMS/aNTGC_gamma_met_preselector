@@ -1,0 +1,1 @@
+/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/postSelected/deltaRgt1p8/TTGJetsTuneCP513TeVamcatnloFXFXmadspinpythia8.root

@@ -1,8 +1,3 @@
-sumGenWeights
-sumGenWeightSigns
-cutFlowEvts
-cutFlow
-cutFlowWgtSigns
 _1D_pTgamma
 _1D_etagamma
 _1D_phigamma
@@ -15,7 +10,6 @@ _1D_CHSPrunedMassak8Tjet
 _1D_CHSSDMassak8Tjet
 _1D_tau21ak8Tjet
 _1D_tau32ak8Tjet
-_1D_tau43ak8Tjet
 _1D_ECF2beta1
 _1D_ECF3beta1
 _1D_ECF2beta2
@@ -23,3 +17,6 @@ _1D_ECF3beta2
 _1D_CSVv2ak8Tjet
 _1D_NoofakT4jetswithpT40GeV
 _1D_DeltaRak8Tjetgamma
+_1D_slashET
+_1D_phislashET
+

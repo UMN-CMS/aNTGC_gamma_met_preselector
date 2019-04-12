@@ -18,6 +18,7 @@
 #include "TAxis.h"
 #include "TObjArray.h"
 #include "TColor.h"
+#include "TBranch.h"
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
@@ -117,6 +118,7 @@ Bool_t isROOTfile(std::string _filepath);
 std::vector<Float_t> getXlimits(std::vector<TH1*> _hists, Float_t _binThreshold=0.);
 void clearStack();
 Double_t weightedYmean(TH1 *_hist);
+Bool_t branchExists(std::string _branchName, TTree *_tree);
 
 struct JJG_EventClass;
 template <typename anytype>
@@ -1568,6 +1570,17 @@ Double_t weightedYspread(TH1 *_hist){
 		_weightedSumDeltaY2 += _binWeight * (_hist->GetBinContent(i) - _weightedYmean) * (_hist->GetBinContent(i) - _weightedYmean);
 	}
 	return (_weightedSumDeltaY2/_weightSum);
+};
+
+
+Bool_t branchExists(std::string _branchName, TTree *_tree){
+	TBranch* br = (TBranch*) _tree->GetListOfBranches()->FindObject(_branchName.c_str());
+	if(br){
+		delete br;
+		return 1;
+	} else{
+		return 0;
+	}
 };
 
 #endif
