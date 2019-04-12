@@ -4,5 +4,5 @@
 *.so
 #*.root
 test/
-#out/
+out/
 test_files/
