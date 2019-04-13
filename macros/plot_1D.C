@@ -102,6 +102,7 @@ void plotHist(std::string _histName){
 		bgHist = (TH1F*) rebinHist(bgHist, newBins);
 		// thingsToDelete.push_back(bgHist);
 		bgHist->Scale(histOpts.getFloat("luminosity"), "width");
+		if(histOpts.getFloat("kFactor")>0.) bgHist->Scale(histOpts.getFloat("kFactor"));
 		BACKGROUNDS[i].assignAtt(bgHist);
 		legend.AddEntry(bgHist, BACKGROUNDS[i].legend.c_str(), "FL");
 		bgHistStack.Add(bgHist, "HIST ");
@@ -135,6 +136,8 @@ void plotHist(std::string _histName){
 		signalHist = (TH1F*) rebinHist(signalHist, newBins);
 		// thingsToDelete.push_back(signalHist);
 		signalHist->Scale(histOpts.getFloat("luminosity"), "width");
+
+		if(histOpts.getFloat("kFactor")>0.) signalHist->Scale(histOpts.getFloat("kFactor"));
 		signal.assignAtt(signalHist, histOpts.getFloat("markerSize"), histOpts.getFloat("linewidth"));
 		legend.AddEntry(signalHist, signal.legend.c_str(), "L");
 		pad1.cd();
@@ -165,9 +168,13 @@ void plotHist(std::string _histName){
 	TLegendEntry* sigLeg = legend.AddEntry(&pad2, sigString.c_str(), "");
 	sigLeg->SetTextColor(kRed);
 
+	cout<<"\t\t kFactor with data "<<dataOverMC->Integral("width")/sumBG->Integral("width");
+
 	// thingsToDelete.push_back(dataOverMC);
 	// thingsToDelete.push_back(sumBG);
 	dataOverMC->Divide(sumBG);
+
+
 
 	sumBG->Delete();
 
@@ -234,8 +241,6 @@ void plotHist(std::string _histName){
 	gPad->Update();
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 	canvas.RedrawAxis();
 	canvas.Update();

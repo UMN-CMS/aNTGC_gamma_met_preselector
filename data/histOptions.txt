@@ -1,9 +1,9 @@
-writeDir,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/plots/
-xSectionMap,../data/meanXsections_wkFactor.txt
+writeDir,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4_flatKfactor1p3allBG/plots/
+xSectionMap,../data/meanXsections.txt
 colName,0
 colXsec,1
 histList,../data/histList.txt
-datasetList,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval//preSelectedList.txt
+datasetList,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4//preSelectedList.txt
 ttSample,TTJetsTuneCP513TeVamcatnloFXFXpythia8
 ttSampleLegend,t#bar{t}+Jets
 binThreshold,0.5
@@ -47,7 +47,7 @@ ratioPlotYtitle,Data/MC
 rebinStatUnc,0.08
 luminosity,41063.
 dataLineWidth,6.
-ratioMax,10.
+ratioMax,2..
 ratioMin,0.5
 ratioAtMost,1.06
 ratioAtLeast,0.94
@@ -57,3 +57,4 @@ stackMin,0.8
 dataMCopt1,E2
 dataMCopt2,PESAME
 maxBinRatio,2.
+kFactor,1.3

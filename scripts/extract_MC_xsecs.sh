@@ -37,14 +37,12 @@ writeFile=$2
 
 rm -f ${writeFile}
 
-for jobDir in $(find "${searchPath}" -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*');
-do
-	for logFile in $(find ${jobDir} -name "*.gz" -path "*crab_xSections_*" -not -path '*/failed/*' -type f);
-	do
-		# getXsec ${logFile} ${jobDir}
+# for jobDir in $(find "${searchPath}" -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*');
+	# for logFile in $(find ${jobDir} -name "*.gz" -path "*crab_xSections_*" -not -path '*/failed/*' -type f);
+for jobDir in $(find "${searchPath}" -maxdepth 2 -mindepth 2 -type d -path "*GENSIM*"); do
+	for logFile in $(find ${jobDir} -name "*.gz" -type f -not -path '*/failed/*'); do
 		_sampleName=$(basename -- "$jobDir")
 		_sampleName=$(echo ${_sampleName} | tr -cd [:alnum:])
-
 		getXsec ${logFile} ${_sampleName} | tee -a ${writeFile}
 
 	done

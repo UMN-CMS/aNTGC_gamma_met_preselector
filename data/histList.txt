@@ -17,6 +17,4 @@ _1D_ECF3beta2
 _1D_CSVv2ak8Tjet
 _1D_NoofakT4jetswithpT40GeV
 _1D_DeltaRak8Tjetgamma
-_1D_slashET
-_1D_phislashET
 
