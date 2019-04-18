@@ -1,9 +1,9 @@
-writeDir,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4_flatKfactor1p3allBG/plots/
-xSectionMap,../data/meanXsections.txt
+writeDir,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/compareModels/
+xSectionMap,../data/2019_aNTGC_mean_xSections.txt
 colName,0
 colXsec,1
 histList,../data/histList.txt
-datasetList,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4//preSelectedList.txt
+datasetList,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/test_h3z0p0008_2019VtxModel_preSelected.txt
 ttSample,TTJetsTuneCP513TeVamcatnloFXFXpythia8
 ttSampleLegend,t#bar{t}+Jets
 binThreshold,0.5
@@ -44,7 +44,7 @@ unitylinecolor,#d73027
 errorBandFillStyle,3005
 dataMarkerStyle,21
 ratioPlotYtitle,Data/MC
-rebinStatUnc,0.08
+rebinStatUnc,0.20
 luminosity,41063.
 dataLineWidth,6.
 ratioMax,2..

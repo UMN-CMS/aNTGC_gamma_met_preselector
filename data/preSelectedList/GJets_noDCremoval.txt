@@ -1,5 +1,0 @@
-/scratch/mwadud/anTGCpreselector/noDCremoval/GJetsHT200To400TuneCP513TeVmadgraphMLMpythia8.root
-/scratch/mwadud/anTGCpreselector/noDCremoval/GJetsHT600ToInfTuneCP513TeVmadgraphMLMpythia8.root
-/scratch/mwadud/anTGCpreselector/noDCremoval/GJetsHT100To200TuneCP513TeVmadgraphMLMpythia8.root
-/scratch/mwadud/anTGCpreselector/noDCremoval/GJetsHT400To600TuneCP513TeVmadgraphMLMpythia8.root
-/scratch/mwadud/anTGCpreselector/noDCremoval/GJetsHT40To100TuneCP513TeVmadgraphMLMpythia8.root

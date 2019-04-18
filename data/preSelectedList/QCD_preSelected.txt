@@ -1,9 +1,0 @@
-../out/QCDHT50to100TuneCP513TeVmadgraphMLMpythia8.root
-../out/QCDHT1000to1500TuneCP513TeVmadgraphpythia8.root
-../out/QCDHT500to700TuneCP513TeVmadgraphpythia8.root
-../out/QCDHT700to1000TuneCP513TeVmadgraphpythia8.root
-../out/QCDHT1500to2000TuneCP513TeVmadgraphpythia8.root
-../out/QCDHT100to200TuneCP513TeVmadgraphpythia8.root
-../out/QCDHT300to500TuneCP513TeVmadgraphpythia8.root
-../out/QCDHT2000toInfTuneCP513TeVmadgraphpythia8.root
-../out/QCDHT200to300TuneCP513TeVmadgraphpythia8.root

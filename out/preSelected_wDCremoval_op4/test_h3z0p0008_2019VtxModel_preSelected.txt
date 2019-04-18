@@ -1,0 +1,3 @@
+h3z0p0008VtxModel2019FlatPt,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/test_h3z0p0008_2019VtxModel_flatPt.txt
+h3z0p0008VtxModel2019BinnedPt,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/test_h3z0p0008_2019VtxModel_ptBinned.txt
+h3z0p0008EFTModelBinnedPt,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/aNTGCjjgloh3z0p0008_preSelected.txt

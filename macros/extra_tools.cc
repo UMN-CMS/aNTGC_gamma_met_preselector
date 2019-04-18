@@ -120,15 +120,9 @@ void clearStack();
 Double_t weightedYmean(TH1 *_hist);
 Bool_t branchExists(std::string _branchName, TTree *_tree);
 Float_t getMean(std::vector<Float_t> _set);
+template <class ObjType>
+ObjType copyObjectDeleteSrc(ObjType *_original);
 
-Float_t getMean(std::vector<Float_t> _set){
-	if(_set.empty()) return -9999.;
-	Double_t _sum = 0.;
-	for(Float_t _num : _set){
-		_sum += _num;
-	}
-	return _sum/((Double_t)_set.size());
-};
 
 struct JJG_EventClass;
 template <typename anytype>
@@ -1591,6 +1585,24 @@ Bool_t branchExists(std::string _branchName, TTree *_tree){
 	} else{
 		return 0;
 	}
+};
+
+
+Float_t getMean(std::vector<Float_t> _set){
+	if(_set.empty()) return -9999.;
+	Double_t _sum = 0.;
+	for(Float_t _num : _set){
+		_sum += _num;
+	}
+	return _sum/((Double_t)_set.size());
+};
+
+
+template <class ObjType>
+ObjType copyObjectDeleteSrc(ObjType *_original){
+	ObjType _copy(*_original);
+	_original->Delete();
+	return _copy;
 };
 
 #endif

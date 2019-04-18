@@ -68,17 +68,21 @@ void plotHist(std::string _histName){
 	canvas.cd();
 	pad1.Draw();
 	pad1.SetGrid(1,1);
-	pad1.SetLogy();
+	// pad1.SetLogy();
 
 	TH1F *refHist = (TH1F*) mergeBins(REFERENCE.ntuple, _histName, "sumGenWeights", histOpts.get("xSectionMap"), histOpts.getInt("colName"), histOpts.getInt("colXsec"),"_merged");
 	REFERENCE.assignAtt(refHist, histOpts.getFloat("markerSize"), histOpts.getFloat("dataLineWidth"));
 	legend.AddEntry(refHist, REFERENCE.legend.c_str(), "L");
 
+	//////////////////////////////////////
+	thingsToDelete.push_back(refHist);
+	//////////////////////////////////////
+
 	std::vector<Double_t> newBins;
 
-	if(_histName == "_1D_NoofakT4jetswithpT40GeV") newBins = getXbins(refHist);
-	else  newBins = getGoodBins(refHist, histOpts.getFloat("rebinStatUnc"));
-	refHist = (TH1F*) rebinHist(refHist, newBins);
+	// if(_histName == "_1D_NoofakT4jetswithpT40GeV") newBins = getXbins(refHist);
+	// else  newBins = getGoodBins(refHist, histOpts.getFloat("rebinStatUnc"));
+	// refHist = (TH1F*) rebinHist(refHist, newBins);
 
 	refHist->Scale(1./refHist->Integral());
 
@@ -99,7 +103,7 @@ void plotHist(std::string _histName){
 			x_axis_title = sampleHist->GetXaxis()->GetTitle();
 			y_axis_title =  sampleHist->GetYaxis()->GetTitle();
 		}
-		sampleHist = (TH1F*) rebinHist(sampleHist, newBins);
+		// sampleHist = (TH1F*) rebinHist(sampleHist, newBins);
 		sampleHist->Scale(1./sampleHist->Integral());
 		SAMPLES[i].assignAtt(sampleHist);
 		legend.AddEntry(sampleHist, SAMPLES[i].legend.c_str(), "FL");
@@ -163,7 +167,7 @@ void plotHist(std::string _histName){
 	ratioStack.GetYaxis()->SetLabelSize(histOpts.getFloat("pad2axislabelsize"));
 	ratioStack.GetXaxis()->SetRangeUser(xLimits[1], xLimits[0]);
 
-	Float_t _ratioSpread = *std::max_element(_ratioSpread.begin(), _ratioSpreads.end());
+	Float_t _ratioSpread = *std::max_element(_ratioSpreads.begin(), _ratioSpreads.end());
 	Float_t _ratioMean = getMean(_ratioMeans);
 
 	Float_t ratioMin = _ratioMean - histOpts.getFloat("ratioNspread") * _ratioSpread;
@@ -213,18 +217,9 @@ void plot_1D(){
 
 	std::string datasetList=histOpts.get("datasetList");
 
-	// REFERENCE.set(getNonemptyLines(vLookup("SinglePhoton2017", datasetList, 0, 1))[0], "2017 Data", 20, "#4d4d4d");
-	// SM.set(vLookup("aNTGCjjgloh3z0sm", datasetList, 0, 1), "SM Z(#rightarrow JJ)+#gamma", -3022, "#d73027");
-	// SIGNALS.emplace_back(vLookup("aNTGCjjgloh3z0p0003", datasetList, 0, 1), "h_{3}^{Z}=0.0003", 29, "#01665e");
-	// SIGNALS.emplace_back(vLookup("aNTGCjjgloh3z0p0005", datasetList, 0, 1), "h_{3}^{Z}=0.0005", 29, "#542788");
-	SIGNALS.emplace_back(vLookup("aNTGCjjgloh3z0p0008", datasetList, 0, 1), "h_{3}^{Z}=0.0008", 29, "#a65628.");
-	// SIGNALS.emplace_back(vLookup("aNTGCjjgloh3z0p0015", datasetList, 0, 1), "h_{3}^{Z}=0.0015", 29, "#b2182b");
-	// SIGNALS.emplace_back(vLookup("aNTGCjjgloh3z0p0029", datasetList, 0, 1), "h_{3}^{Z}=0.0029", 29, "#e08214");
-	// SIGNALS.emplace_back(vLookup("aNTGCjjgloh3z0p0038", datasetList, 0, 1), "h_{3}^{Z}=0.0038", 29, "#c51b7d");
-	SAMPLES.push_back(SM);
-	SAMPLES.emplace_back(vLookup(histOpts.get("ttSample"), datasetList, 0, 1), histOpts.get("ttSampleLegend"), -3004, "#762a83");
-	SAMPLES.emplace_back(vLookup("QCD", datasetList, 0, 1), "QCD", -3005, "#1b7837");
-	SAMPLES.emplace_back(vLookup("GJets", datasetList, 0, 1), "#gamma+Jets", -3007, "#2166ac");
+	REFERENCE.set(vLookup("h3z0p0008EFTModelBinnedPt", datasetList, 0, 1), "EFT", 29, "#a65628.");
+	SAMPLES.emplace_back(vLookup("h3z0p0008VtxModel2019FlatPt", datasetList, 0, 1), "Flat p_{T}", 21, "#1b7837");
+	SAMPLES.emplace_back(vLookup("h3z0p0008VtxModel2019BinnedPt", datasetList, 0, 1), "p_{T} binned", 22, "#2166ac");
 
 	std::vector<std::string> histList = getNonemptyLines(histOpts.get("histList"));
 
