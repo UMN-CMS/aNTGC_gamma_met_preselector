@@ -134,15 +134,15 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	var_AK8PuppiJet_tau32{AK8PuppiJet_tau32_, 0., 1., 100, "\\tau_{32}(ak^{8}_{T}\\ jet)"},
 	var_deltaR_AK8PuppiJet_G{deltaR_AK8PuppiJet_G_, 0., 5., 50, "\\Delta{R}(ak^{8}_{T}\\ jet, \\gamma)"},
 	var_AK8PuppiJet_nb1ecfR32{AK8PuppiJet_nb1ecfR32_, 0., 10., 1000, "ECF_{32}(\\beta=1)"},
-	var_AK8PuppiJet_nb2ecfR32{AK8PuppiJet_nb1ecfR32_, 0., 10., 1000, "ECF_{32}(\\beta=2)"},
+	var_AK8PuppiJet_nb2ecfR32{AK8PuppiJet_nb2ecfR32_, 0., 10., 1000, "ECF_{32}(\\beta=2)"},
 	var_AK8PuppiJet_CSVv2{AK8PuppiJet_CSV_, 0., 1., 100, "CSV_{v2}(ak^{8}_{T}\\ jet)"},
 	var_AK8PuppiJet_pfBoostedDSVBTag{AK8PuppiJet_pfBoostedDSVBTag_, 0., 1., 100, "Boosted double SV B-tag"},
 	var_AK8PuppiJet_DDBvLTags_bb{AK8PuppiJet_DDBvLTags_bb_, 0., 1., 100, "DDB vs L: bb/(qcd+bb)"},
 	var_AK8PuppiJet_DDCvLTags_cc{AK8PuppiJet_DDCvLTags_cc_, 0., 1., 100, "DDC vs L: cc/(qcd+cc)"},
 	var_AK8PuppiJet_DDCvBTags_bb{AK8PuppiJet_DDCvBTags_bb_, 0., 1., 100, "DDC vs B: bb"},
 	var_AK8PuppiJet_DDCvBTags_cc{AK8PuppiJet_DDCvBTags_cc_, 0., 1., 100, "DDC vs B: cc"},
-	var_AK8PuppiJet_DDBDTags_bbcsLight{AK8PuppiJet_DDBDTags_bbcsLight_, 0., 5., 500, "DDBD bb vs L"},
-	var_AK8PuppiJet_DDBDTags_ccvsLight{AK8PuppiJet_DDBDTags_ccvsLight_, 0., 5., 500, "DDBD cc vs L"},
+	var_AK8PuppiJet_DDBDTags_bbcsLight{AK8PuppiJet_DDBDTags_bbcsLight_, 0., 1., 100, "DDBD bb vs L"},
+	var_AK8PuppiJet_DDBDTags_ccvsLight{AK8PuppiJet_DDBDTags_ccvsLight_, 0., 1., 100, "DDBD cc vs L"},
 	var_MET{pfMET_, 0., 1500., 1500, "#slash{E}_{T}", "GeV"},
 	var_METPhi{pfMETPhi_, -3.15, 3.15, 63, "#phi(#slash{E}_{T})"};
 
@@ -248,7 +248,7 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 
 		run_ = run;
 		event_ = event;
-		weight_ = isMC ? ((genWeight) * _xSec) : 1.;
+		weight_ = isMC ? ((genWeight) * _xSec / _sumGenWeight) : 1.;
 		deltaR_AK8PuppiJet_G_ = deltaR_AK8PuppiJetG;
 		phoEta_ = phoEta;
 		phoPhi_ = phoPhi;
