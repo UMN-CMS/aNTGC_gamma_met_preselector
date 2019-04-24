@@ -351,7 +351,7 @@ struct histogram_template {
 		std::cout<<"\t\tInitialized TH1F "<<histName<<std::endl;
 	};
 
-	void fill(Float_t weight = 1.0){
+	void fill(Double_t weight = 1.0){
 		if(!hist){
 			std::cout<<"Cannot fill! TH1F ("<<var->xtitle <<") is uninitialized!";
 			return;
@@ -388,7 +388,7 @@ struct twoDhistogram_template {
 		if(hist) isUser = 1;
 	};
 
-	void fill(Float_t weight = 1.0){
+	void fill(Double_t weight = 1.0){
 		if(!hist) {
 			std::cout<<"Cannot fill! TH2F ("<<xvar->xtitle << " VS "<< yvar->xtitle<<") is uninitialized!";
 			return;

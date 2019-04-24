@@ -54,7 +54,6 @@ private:
 	TTreeReaderAnyValue<Long64_t> _event;
 	TTreeReaderAnyValue<Int_t> _lumis;
 
-
 	TTreeReaderAnyValue<Bool_t> _isPVGood;
 
 
@@ -63,12 +62,16 @@ private:
 
 	TTreeReaderAnyValue<Float_t> _genWeight;
 	TTreeReaderAnyValue<Char_t> _mcHasDirectPromptPho;
-
 	TTreeReaderVectorValue<Int_t> _mcStatus;
 	TTreeReaderVectorValue<Int_t> _mcPID;
 	TTreeReaderVectorValue<Int_t> _mcMomPID;
 	TTreeReaderVectorValue<Float_t> _mcEta;
 	TTreeReaderVectorValue<Float_t> _mcPhi;
+	TTreeReaderVectorValue<Float_t> _mcPt;
+	TTreeReaderVectorValue<Float_t> _mcE;
+	TTreeReaderVectorValue<Int_t> _mcIndex;
+	TTreeReaderVectorValue<Int_t> _mcStatusFlag;
+	TTreeReaderVectorValue<Float_t> _genMET;
 
 
 	TTreeReaderAnyValue<Float_t> _pfMET;

@@ -117,6 +117,11 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 		_mcMomPID.set(inputTTreeReader, "mcMomPID");
 		_mcEta.set(inputTTreeReader, "mcEta");
 		_mcPhi.set(inputTTreeReader, "mcPhi");
+		_mcPt.set(inputTTreeReader, "mcPt");
+		_mcE.set(inputTTreeReader, "mcE");
+		_mcIndex.set(inputTTreeReader, "mcIndex");
+		_mcStatusFlag.set(inputTTreeReader, "mcStatusFlag");
+		_genMET.set(inputTTreeReader, "genMET");
 	}
 
 	_pfMET.set(inputTTreeReader, "pfMET");
@@ -633,7 +638,7 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 		if((_AK8PuppiJet_Pt[i]) < 200.) continue;
 		if(std::abs((_AK8PuppiJet_Eta[i])) > 2.5) continue;
 		if(!getBit((_AK8PuppiJet_PFid[i]),1)) continue;
-		if(std::abs((_AK8PuppiJet_Mass[i]) - ZMASS) > 50.) continue;
+		// if(std::abs((_AK8PuppiJet_Mass[i]) - ZMASS) > 50.) continue;
 		_200GeVak8JetCounter++;
 		if((_AK8PuppiJet_Pt[i]) > _highestPtAK8Jet){
 			_highestPtAK8Jet =(_AK8PuppiJet_Pt[i]);
