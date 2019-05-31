@@ -1,1 +1,0 @@
-/scratch/mwadud/anTGCpreselector/out/preSelected_testVtxModelBtaggedPrunedMassCut/TTGammaHadronicTuneCP5PSweights13TeVmadgraphpythia8.root
