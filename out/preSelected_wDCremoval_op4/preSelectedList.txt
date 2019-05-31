@@ -1,2 +1,0 @@
-QCD,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/QCD_preSelected.txt
-GJets,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/GJets_preSelected.txt

@@ -4,6 +4,14 @@
 #include "eventPreselector.h"
 #include "TSystem.h"
 
+Int_t findSecondaryIndex(Int_t searchIndex, std::vector<Int_t> container){
+	Int_t secondaryIndex = -999;
+	for(Int_t i = 0; i < container.size(); i++){
+		if( container[i] ==  searchIndex) secondaryIndex = i;
+	}
+	return secondaryIndex;
+};
+
 
 Bool_t aNTGCpreselector::phoIsDirectPromptDeltaR0p05(){
 	Int_t _nMC = _mcStatus.size();
@@ -122,6 +130,7 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 		_mcIndex.set(inputTTreeReader, "mcIndex");
 		_mcStatusFlag.set(inputTTreeReader, "mcStatusFlag");
 		_genMET.set(inputTTreeReader, "genMET");
+		_pho_gen_index.set(inputTTreeReader, "pho_gen_index");
 	}
 
 	_pfMET.set(inputTTreeReader, "pfMET");
@@ -240,6 +249,14 @@ void aNTGCpreselector::setBoostedJetGhists(){
 		hist2d.hist->SetDirectory(outFile->GetDirectory(""));
 	}
 
+	if(isMC){
+		std::cout<<"Initializing gen TH1D for boosted Jet + gamma channel..."<<std::endl;
+		for(auto & hist1d : boostedJetG_1d_GenHistograms){
+			hist1d.initializehist();
+			hist1d.hist->SetDirectory(outFile->GetDirectory(""));
+		}
+	}
+
 	gSystem->cd(0);
 
 	std::cout<<"\tBoosted Jet+Gamma histograms initialized!"<<std::endl;
@@ -260,9 +277,6 @@ void aNTGCpreselector::setOutputTree(){
 		outTree->Branch("mcHasDirectPromptPho", &mcHasDirectPromptPho_);
 	}
 	outTree->Branch("leptVeto", &leptVeto_);
-	// outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_0p8", &p_nAK4CHSJets_in_AK8PuppiJet_0p8);
-	// outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_1p0", &p_nAK4CHSJets_in_AK8PuppiJet_1p0);
-	// outTree->Branch("nAK4CHSJets_in_AK8PuppiJet_1p2", &p_nAK4CHSJets_in_AK8PuppiJet_1p2);
 
 	outTree->Branch("deltaR_AK8PuppiJetG", &p_deltaR_AK8PuppiJetG);
 	outTree->Branch("phoEta", &phoEta_);
@@ -322,10 +336,10 @@ void aNTGCpreselector::setOutputTree(){
 	// outTree->Branch("eleIDbit", &eleIDbit_);
 	// outTree->Branch("muPt", &muPt_);
 	// outTree->Branch("muIDbit", &muIDbit_);
-	outTree->Branch("AK4CHSJet_Pt", &AK4CHSJet_Pt_);
-	outTree->Branch("AK4CHSJet_En", &AK4CHSJet_En_);
-	outTree->Branch("AK4CHSJet_Eta", &AK4CHSJet_Eta_);
-	outTree->Branch("AK4CHSJet_Phi", &AK4CHSJet_Phi_);
+	// outTree->Branch("AK4CHSJet_Pt", &AK4CHSJet_Pt_);
+	// outTree->Branch("AK4CHSJet_En", &AK4CHSJet_En_);
+	// outTree->Branch("AK4CHSJet_Eta", &AK4CHSJet_Eta_);
+	// outTree->Branch("AK4CHSJet_Phi", &AK4CHSJet_Phi_);
 	// outTree->Branch("AK4CHSJet_ConsituentEtaPhiSpread", &AK4CHSJet_ConsituentEtaPhiSpread_);
 	// outTree->Branch("AK4CHSJet_constituentPtDistribution", &AK4CHSJet_constituentPtDistribution_);
 	// outTree->Branch("AK4CHSJet_MaxConstituentDistance", &AK4CHSJet_MaxConstituentDistance_);
@@ -345,11 +359,20 @@ void aNTGCpreselector::setOutputTree(){
 	// 	outTree->Branch("AK4CHSJet_PartonFlavour", &AK4CHSJet_PartonFlavour_);
 	// 	outTree->Branch("AK4CHSJet_HadronFlavour", &AK4CHSJet_HadronFlavour_);
 	// }
-	outTree->Branch("AK4CHSJet_ID", &AK4CHSJet_ID_);
-	outTree->Branch("AK4CHSJet_PUID", &AK4CHSJet_PUID_);
+	// outTree->Branch("AK4CHSJet_ID", &AK4CHSJet_ID_);
+	// outTree->Branch("AK4CHSJet_PUID", &AK4CHSJet_PUID_);
 	// outTree->Branch("AK4CHSJet_PUFullID", &AK4CHSJet_PUFullID_);
-	outTree->Branch("AK4CHSJet_qgLikelihood", &AK4CHSJet_qgLikelihood_);
-	outTree->Branch("AK4CHSJet_deltaR_selectedAK8PuppiJet", &AK4CHSJet_deltaR_selectedAK8PuppiJet_);
+	// outTree->Branch("AK4CHSJet_qgLikelihood", &AK4CHSJet_qgLikelihood_);
+	// outTree->Branch("AK4CHSJet_deltaR_selectedAK8PuppiJet", &AK4CHSJet_deltaR_selectedAK8PuppiJet_);
+
+	outTree->Branch("selectedPhoGenPt", &selectedPhoGenPt_);
+	outTree->Branch("selectedPhoGenEta", &selectedPhoGenEta_);
+	outTree->Branch("selectedPhoGenPhi", &selectedPhoGenPhi_);
+	outTree->Branch("selectedPhoGenE", &selectedPhoGenE_);
+	outTree->Branch("selectedAk8JetGenPt", &selectedAk8JetGenPt_);
+	outTree->Branch("selectedAk8JetGenEta", &selectedAk8JetGenEta_);
+	outTree->Branch("selectedAk8JetGenPhi", &selectedAk8JetGenPhi_);
+	outTree->Branch("selectedAk8JetGenE", &selectedAk8JetGenE_);
 
 
 
@@ -375,11 +398,6 @@ void aNTGCpreselector::copyEvent(){
 		genWeight_ = _genWeight;
 		mcHasDirectPromptPho_ = _mcHasDirectPromptPho;
 	}
-
-	Float_t _selectedPhoEta =_phoEta[selectedPhotonIndex];
-	Float_t _selectedPhoPhi =_phoPhi[selectedPhotonIndex];
-	Float_t _selectedAK8JetEta =_AK8PuppiJet_Eta[selectedAK8PuppiJetIndex];
-	Float_t _selectedAK8JetPhi =_AK8PuppiJet_Phi[selectedAK8PuppiJetIndex];
 
 	phoEta_ = _phoEta[selectedPhotonIndex];
 	phoPhi_ = _phoPhi[selectedPhotonIndex];
@@ -438,31 +456,39 @@ void aNTGCpreselector::copyEvent(){
 	pfMET_ = _pfMET;
 	pfMETPhi_ = _pfMETPhi;
 
-	Int_t _nAk4Jets = _AK4CHSJet_Pt.size();
-	// p_nAK4CHSJets_in_AK8PuppiJet_0p8 = 0.;
-	// p_nAK4CHSJets_in_AK8PuppiJet_1p0 = 0.;
-	// p_nAK4CHSJets_in_AK8PuppiJet_1p2 = 0.;
+	// Int_t _nAk4Jets = _AK4CHSJet_Pt.size();
+	// p_nAK4CHSJets_40GeV=0.;
+	// for(Int_t i =0; i < _nAk4Jets; i++){
+	// 	if(_AK4CHSJet_Pt[i] < 40.) continue;
+	// 	// AK4CHSJet_Pt_.push_back(_AK4CHSJet_Pt[i]);
+	// 	// AK4CHSJet_En_.push_back(_AK4CHSJet_En[i]);
+	// 	// AK4CHSJet_Eta_.push_back(_AK4CHSJet_Eta[i]);
+	// 	// AK4CHSJet_Phi_.push_back(_AK4CHSJet_Phi[i]);
+	// 	// AK4CHSJet_ID_.push_back(_AK4CHSJet_ID[i]);
+	// 	// AK4CHSJet_PUID_.push_back(_AK4CHSJet_PUID[i]);
+	// 	// AK4CHSJet_qgLikelihood_.push_back(_AK4CHSJet_qgLikelihood[i]);
+	// 	p_nAK4CHSJets_40GeV++;
+	// };
 
-	p_nAK4CHSJets_40GeV=0.;
+	p_deltaR_AK8PuppiJetG = deltaR(phoEta_, phoPhi_, AK8PuppiJet_Eta_, AK8PuppiJet_Phi_);
 
+	if(isMC){
+		Int_t modifiedPhoGenIndex = findSecondaryIndex(_pho_gen_index[selectedPhotonIndex], (_mcIndex));
 
-	for(Int_t i =0; i < _nAk4Jets; i++){
-		if(_AK4CHSJet_Pt[i] < 40.) continue;
-		AK4CHSJet_Pt_.push_back(_AK4CHSJet_Pt[i]);
-		AK4CHSJet_En_.push_back(_AK4CHSJet_En[i]);
-		AK4CHSJet_Eta_.push_back(_AK4CHSJet_Eta[i]);
-		AK4CHSJet_Phi_.push_back(_AK4CHSJet_Phi[i]);
-		AK4CHSJet_ID_.push_back(_AK4CHSJet_ID[i]);
-		AK4CHSJet_PUID_.push_back(_AK4CHSJet_PUID[i]);
-		AK4CHSJet_qgLikelihood_.push_back(_AK4CHSJet_qgLikelihood[i]);
-		p_nAK4CHSJets_40GeV++;
-		// {
-		// 	// if(_deltaR_ak4_slectedak8<0.8) p_nAK4CHSJets_in_AK8PuppiJet_0p8++;
-		// 	// if(_deltaR_ak4_slectedak8<1.0) p_nAK4CHSJets_in_AK8PuppiJet_1p0++;
-		// 	// if(_deltaR_ak4_slectedak8<1.2) p_nAK4CHSJets_in_AK8PuppiJet_1p2++;
-		// }
-	};
-	p_deltaR_AK8PuppiJetG = deltaR(_selectedPhoEta, _selectedPhoPhi, _selectedAK8JetEta, _selectedAK8JetPhi);
+		selectedPhoGenPt_ = (modifiedPhoGenIndex>0) ? _mcPt[modifiedPhoGenIndex] : -9999.;
+		selectedPhoGenEta_ = (modifiedPhoGenIndex>0) ? _mcEta[modifiedPhoGenIndex] : -9999.;
+		selectedPhoGenPhi_ = (modifiedPhoGenIndex>0) ? _mcPhi[modifiedPhoGenIndex] : -9999.;
+		selectedPhoGenE_ = (modifiedPhoGenIndex>0) ? _mcE[modifiedPhoGenIndex] : -9999.;
+
+		selectedAk8JetGenPt_ = _AK8PuppiJet_GenJetPt[selectedAK8PuppiJetIndex];
+		selectedAk8JetGenEta_ = _AK8PuppiJet_GenJetEta[selectedAK8PuppiJetIndex];
+		selectedAk8JetGenPhi_ = _AK8PuppiJet_GenJetPhi[selectedAK8PuppiJetIndex];
+		selectedAk8JetGenE_ = _AK8PuppiJet_GenJetEn[selectedAK8PuppiJetIndex];
+		Float_t selectedAk8JetGenMass2 = selectedAk8JetGenE_* selectedAk8JetGenE_ - selectedAk8JetGenPt_ * selectedAk8JetGenPt_ * cosh(selectedAk8JetGenEta_) * cosh(selectedAk8JetGenEta_);
+		selectedAk8JetGenMass_ = (selectedAk8JetGenMass2>0) ? std::sqrt(selectedAk8JetGenMass2) : -9999.;
+		deltaR_selectedGenAK8PuppiJet_GenGamma_ = deltaR(selectedPhoGenEta_, selectedPhoGenPhi_, selectedAk8JetGenEta_, selectedAk8JetGenPhi_);
+		genMET_ = _genMET;
+	}
 };
 
 
@@ -473,10 +499,10 @@ void aNTGCpreselector::resetVars(){
 	// eleIDbit_.clear();
 	// muPt_.clear();
 	// muIDbit_.clear();
-	AK4CHSJet_Pt_.clear();
-	AK4CHSJet_En_.clear();
-	AK4CHSJet_Eta_.clear();
-	AK4CHSJet_Phi_.clear();
+	// AK4CHSJet_Pt_.clear();
+	// AK4CHSJet_En_.clear();
+	// AK4CHSJet_Eta_.clear();
+	// AK4CHSJet_Phi_.clear();
 	// AK4CHSJet_ConsituentEtaPhiSpread_.clear();
 	// AK4CHSJet_constituentPtDistribution_.clear();
 	// AK4CHSJet_MaxConstituentDistance_.clear();
@@ -494,23 +520,23 @@ void aNTGCpreselector::resetVars(){
 	// AK4CHSJet_CombMVA2Tags_.clear();
 	// AK4CHSJet_PartonFlavour_.clear();
 	// AK4CHSJet_HadronFlavour_.clear();
-	AK4CHSJet_ID_.clear();
-	AK4CHSJet_PUID_.clear();
+	// AK4CHSJet_ID_.clear();
+	// AK4CHSJet_PUID_.clear();
 	// AK4CHSJet_PUFullID_.clear();
-	AK4CHSJet_qgLikelihood_.clear();
-	AK4CHSJet_deltaR_selectedAK8PuppiJet_.clear();
+	// AK4CHSJet_qgLikelihood_.clear();
+	// AK4CHSJet_deltaR_selectedAK8PuppiJet_.clear();
 
 
 	lastCutStep = 0.5;
 
 	leptVeto_ = 0;
 
-	vetoElePt_ = -999.;
-	vetoEleEta_ = -999.;
-	vetoElePhi_ = -999.;
-	vetoMuPt_ = -999.;
-	vetoMuEta_ = -999.;
-	vetoMuPhi_ = -999.;
+	// vetoElePt_ = -999.;
+	// vetoEleEta_ = -999.;
+	// vetoElePhi_ = -999.;
+	// vetoMuPt_ = -999.;
+	// vetoMuEta_ = -999.;
+	// vetoMuPhi_ = -999.;
 };
 
 
@@ -527,6 +553,12 @@ void aNTGCpreselector::fillBoostedJetGhists(){
 
 	for(auto & hist2D : boostedJetG_2d_Histograms){
 		hist2D.fill(genWeight_);
+	}
+
+	if(isMC){
+		for(auto & hist1D : boostedJetG_1d_GenHistograms){
+			hist1D.fill(genWeight_);
+		}
 	}
 };
 
@@ -602,8 +634,11 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 	selectedPhotonIndex = -999;
 	Float_t _highestPtPhoton = -999.;
 	for(Int_t i = 0; i < _nPhotons; i++){
-		Float_t _candPhoPt = _phoCalibEt[i];
-		if(_candPhoPt < 220.) continue;
+		Int_t secondaryIndex = findSecondaryIndex(_pho_gen_index[i], (_mcIndex));
+		if(secondaryIndex< 0) continue;
+		// Float_t _candPhoPt = _mcPt[secondaryIndex];
+		Float_t _candPhoPt =_phoCalibEt[i];
+		if(_candPhoPt < 400.) continue;
 		Float_t _candPhoAbsEta = std::abs(_phoEta[i]);
 		if(_candPhoAbsEta > 2.5 ) continue;
 		if((_candPhoAbsEta > BETRetaMin) && (_candPhoAbsEta < BETRetaMax)) continue;
@@ -618,6 +653,7 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 		}
 	}
 	if(selectedPhotonIndex < 0) return 0;
+
 	registerCutFlow();
 
 
@@ -638,7 +674,7 @@ Bool_t aNTGCpreselector::selectBoostedJetGevent(){
 		if((_AK8PuppiJet_Pt[i]) < 200.) continue;
 		if(std::abs((_AK8PuppiJet_Eta[i])) > 2.5) continue;
 		if(!getBit((_AK8PuppiJet_PFid[i]),1)) continue;
-		// if(std::abs((_AK8PuppiJet_Mass[i]) - ZMASS) > 50.) continue;
+		if(std::abs((_AK8PuppiJet_Mass[i]) - ZMASS) > 50.) continue;
 		_200GeVak8JetCounter++;
 		if((_AK8PuppiJet_Pt[i]) > _highestPtAK8Jet){
 			_highestPtAK8Jet =(_AK8PuppiJet_Pt[i]);

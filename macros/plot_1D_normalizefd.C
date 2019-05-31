@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string histOptionsFile="../data/histOptions.txt";
+std::string histOptionsFile="../data/histOptionsCompareModels.txt";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ void plotHist(std::string _histName){
 	// else  newBins = getGoodBins(refHist, histOpts.getFloat("rebinStatUnc"));
 	// refHist = (TH1F*) rebinHist(refHist, newBins);
 
-	refHist->Scale(1./refHist->Integral());
+	// refHist->Scale(1./refHist->Integral());
 
 	std::string x_axis_title, y_axis_title;
 
@@ -104,8 +104,8 @@ void plotHist(std::string _histName){
 			y_axis_title =  sampleHist->GetYaxis()->GetTitle();
 		}
 		// sampleHist = (TH1F*) rebinHist(sampleHist, newBins);
-		sampleHist->Scale(1./sampleHist->Integral());
-		SAMPLES[i].assignAtt(sampleHist);
+		// sampleHist->Scale(1./sampleHist->Integral());
+		SAMPLES[i].assignAtt(sampleHist, histOpts.getFloat("markerSize"), histOpts.getFloat("dataLineWidth"));
 		legend.AddEntry(sampleHist, SAMPLES[i].legend.c_str(), "FL");
 		histStack.Add(sampleHist, "HIST");
 
@@ -182,10 +182,13 @@ void plotHist(std::string _histName){
 	if(ratioMin != ratioMin) ratioMin = histOpts.getFloat("ratioMin");
 	if(ratioMax != ratioMax) ratioMax = histOpts.getFloat("ratioMax");
 
-	cout<<"rMin = "<<ratioMin<<" rMax"<<ratioMax<<endl;
+	cout<<"\t\t\trMin = "<<ratioMin<<" rMax = "<<ratioMax<<endl;
 	unityLine.Draw("SAME HIST A");
 
 	ratioStack.GetYaxis()->SetRangeUser(ratioMin, ratioMax);
+	ratioStack.GetYaxis()->SetLimits(ratioMin, ratioMax);
+	ratioStack.SetMaximum(ratioMax);
+	ratioStack.SetMinimum(ratioMin);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	gPad->RedrawAxis();
@@ -217,20 +220,21 @@ void plot_1D(){
 
 	std::string datasetList=histOpts.get("datasetList");
 
-	REFERENCE.set(vLookup("h3z0p0008EFTModelBinnedPt", datasetList, 0, 1), "EFT", 29, "#a65628.");
-	SAMPLES.emplace_back(vLookup("h3z0p0008VtxModel2019FlatPt", datasetList, 0, 1), "Flat p_{T}", 21, "#1b7837");
-	SAMPLES.emplace_back(vLookup("h3z0p0008VtxModel2019BinnedPt", datasetList, 0, 1), "p_{T} binned", 22, "#2166ac");
+	REFERENCE.set(vLookup("aNTGCjjgloh3z0p0008EFT", datasetList, 0, 1), "EFT", 29, "#a65628.");
+	SAMPLES.emplace_back(vLookup("aNTGC0p00080p0p0pFlatPt", datasetList, 0, 1), "Flat p_{T} (Vtx)", 21, "#1b7837");
+	SAMPLES.emplace_back(vLookup("aNTGC0p00080p0p0pBinnedPt", datasetList, 0, 1), "p_{T} binned (Vtx)", 22, "#2166ac");
 
-	std::vector<std::string> histList = getNonemptyLines(histOpts.get("histList"));
+	// std::vector<std::string> histList = getNonemptyLines(histOpts.get("histList"));
 
+	cout<<datasetList<<endl;
+	cout<<vLookup("aNTGCjjgloh3z0p0008EFT", datasetList, 0, 1)<<endl;
+	std::vector<std::string> histList = getObjectList(getNonemptyLines(vLookup("aNTGCjjgloh3z0p0008EFT", datasetList, 0, 1))[0], "TH1F");
 	std::string writeDir = histOpts.get("writeDir");
 	mkdir(writeDir);
-
 	for(const auto & hist : histList){
 		plotHist(hist);
 		// clearStack();
 	}
-
 	std::cout<<"Complete!"<<std::endl;
 };
 

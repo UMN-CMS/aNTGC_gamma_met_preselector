@@ -19,9 +19,11 @@ splitfiles=50
 macroTemplate=${workDir}/macroTemplate.C
 runScriptTemplate=${workDir}/submit_job.sh
 condorCFGtemplate=${workDir}/condor_job.sh
-ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselector.cc)
+ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselectorBtaggingStudy.cc)
 ccfil2epath=$(readlink -e ${workDir}/../macros/extra_tools.cc)
-hfilepath=$(readlink -e ${workDir}/../macros/eventPreselector.h)
+hfilepath=$(readlink -e ${workDir}/../macros/eventPreselectorBtaggingStudy.h)
+
+ccfilename=$(basename "${ccfil1epath}")
 
 current_date_time=$(date +%Y-%m-%d_%H-%M-%S)
 echo $current_date_time;
@@ -71,7 +73,7 @@ function preSelectDtaset(){
 	sed -i 's|#macroname|'${jobName}'|g' ${rootMacro}
 	sed -i 's|#fileList|'${listFileName}'|g' ${rootMacro}
 	sed -i 's|#outfilepath|'${outFile}'|g' ${rootMacro}
-	sed -i 's|#ccfilepath|'eventPreselector.cc'|g' ${rootMacro}
+	sed -i 's|#ccfilepath|'${ccfilename}'|g' ${rootMacro}
 
 
 	### prepare run script ###
@@ -106,7 +108,6 @@ function preSelectDtaset(){
 }
 
 mkdir -p ${writeDir}
-ccfilename=$(basename "${ccfil1epath}")
 cp ${ccfil1epath} ${writeDir}/${ccfilename}
 
 ccfil1epath=${writeDir}/${ccfilename}

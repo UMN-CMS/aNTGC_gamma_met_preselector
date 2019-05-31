@@ -1,1 +1,0 @@
-/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/SinglePhoton2017.root

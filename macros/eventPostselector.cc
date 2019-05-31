@@ -120,6 +120,7 @@ void postSelect(std::string _file, std::string _outDir){
 	Float_t genWeight_;
 
 	plot_variable 	 	var_phoCalibEt{phoCalibEt_, 200., 1500., 130, "p_{T}(\\gamma)", "GeV"},
+	var_phoCalibEt_unNorm{phoCalibEt_, 200., 1500., 130, "Unweighted p_{T}(\\gamma)", "GeV"},
 	var_phoEta{phoEta_, ECAL_ETA_BINS, 27, "\\eta(\\gamma)"},
 	var_phoPhi{phoPhi_, -3.15, 3.15, 63, "\\phi(\\gamma)"},
 	var_AK8PuppiJet_Pt{AK8PuppiJet_Pt_, 200., 1500., 130, "p_{T}(ak^{8}_{T}\\ jet)", "GeV"},
@@ -139,7 +140,9 @@ void postSelect(std::string _file, std::string _outDir){
 	var_AK8PuppiJet_nb2ecf2_{AK8PuppiJet_nb2ecf2_, 0., 5., 500, "ECF(2,\\beta=2)"},
 	var_AK8PuppiJet_nb2ecf3_{AK8PuppiJet_nb2ecf3_, 0., 5., 500, "ECF(3,\\beta=2)"},
 	var_MET_{pfMET_, 0., 1500., 1500, "\\slash{E}_{T}", "GeV"},
-	var_METPhi_{pfMETPhi_, -3.15, 3.15, 63, "\\phi(\\slash{E}_{T})"}	;
+	var_METPhi_{pfMETPhi_, -3.15, 3.15, 63, "\\phi(\\slash{E}_{T})"};
+
+	histogram_template	hist_var_phoCalibEt_unNorm(var_phoCalibEt_unNorm);
 
 	std::vector<histogram_template> boostedJetG_1d_Histograms = {
 		{var_phoCalibEt},
@@ -180,6 +183,9 @@ void postSelect(std::string _file, std::string _outDir){
 		hist1d.initializehist();
 		hist1d.hist->SetDirectory(outFile->GetDirectory(""));
 	}
+
+	hist_var_phoCalibEt_unNorm.initializehist();
+	hist_var_phoCalibEt_unNorm.hist->SetDirectory(outFile->GetDirectory(""));
 
 	std::cout<<"Initializing TH2D for boosted Jet + gamma channel..."<<std::endl;
 	for(auto & hist2d : boostedJetG_2d_Histograms){
@@ -256,6 +262,8 @@ void postSelect(std::string _file, std::string _outDir){
 		for(auto & hist :  boostedJetG_1d_Histograms){
 			hist.fill(genWeight_);
 		}
+
+		hist_var_phoCalibEt_unNorm.fill();
 
 		for(auto & hist2D : boostedJetG_2d_Histograms){
 			hist2D.fill(genWeight_);

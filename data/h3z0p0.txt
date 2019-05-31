@@ -1,0 +1,16 @@
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin200_ptmax250_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin250_ptmax300_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin300_ptmax350_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin350_ptmax400_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin400_ptmax450_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin450_ptmax500_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin500_ptmax550_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin550_ptmax600_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin600_ptmax650_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin650_ptmax700_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin700_ptmax750_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin750_ptmax800_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin800_ptmax850_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin850_ptmax900_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin900_ptmax950_V1.txt
+/hdfs/store/user/mwadud/aNTGC/ntupleLists/aNTGC_jjg_lo_h3z0_ptmin950_ptmax1000_V1.txt

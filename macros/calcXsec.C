@@ -3,8 +3,8 @@
 // std::string INFILE="../data/xSections.txt";
 // std::string OUTFILE="../data/meanXsections.txt";
 
-std::string INFILE="../data/2019_aNTGC_xSections.txt";
-std::string OUTFILE="../data/2019_aNTGC_mean_xSections.txt";
+std::string INFILE="../data/2019_higherCouplings.txt";
+std::string OUTFILE="../data/2019_higherCouplings_meanXsecs.txt";
 
 void calcXsec(std::string _inFile=INFILE, std::string _outFile=OUTFILE){
 	CSVReader _infileCSV(_inFile);

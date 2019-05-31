@@ -1,1 +1,0 @@
-/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval/postSelected/deltaRgt1p8_CHSSDmass60to120_ECF31in1to2p5/SinglePhoton2017.root

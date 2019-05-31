@@ -70,8 +70,8 @@ private:
 	TTreeReaderVectorValue<Float_t> _mcPt;
 	TTreeReaderVectorValue<Float_t> _mcE;
 	TTreeReaderVectorValue<Int_t> _mcIndex;
-	TTreeReaderVectorValue<Int_t> _mcStatusFlag;
-	TTreeReaderVectorValue<Float_t> _genMET;
+	TTreeReaderVectorValue<UShort_t> _mcStatusFlag;
+	TTreeReaderAnyValue<Float_t> _genMET;
 
 
 	TTreeReaderAnyValue<Float_t> _pfMET;
@@ -90,10 +90,10 @@ private:
 	TTreeReaderVectorValue<Int_t> _muIDbit;
 
 
-	TTreeReaderVectorValue< Float_t> _AK4CHSJet_Pt;
-	TTreeReaderVectorValue< Float_t> _AK4CHSJet_En;
-	TTreeReaderVectorValue< Float_t> _AK4CHSJet_Eta;
-	TTreeReaderVectorValue< Float_t> _AK4CHSJet_Phi;
+	// TTreeReaderVectorValue< Float_t> _AK4CHSJet_Pt;
+	// TTreeReaderVectorValue< Float_t> _AK4CHSJet_En;
+	// TTreeReaderVectorValue< Float_t> _AK4CHSJet_Eta;
+	// TTreeReaderVectorValue< Float_t> _AK4CHSJet_Phi;
 		// TTreeReaderVectorValue< Float_t> _AK4CHSJet_ConsituentEtaPhiSpread;
 		// TTreeReaderVectorValue< Float_t> _AK4CHSJet_constituentPtDistribution;
 		// TTreeReaderVectorValue< Float_t> _AK4CHSJet_MaxConstituentDistance;
@@ -111,10 +111,10 @@ private:
 		// TTreeReaderVectorValue< Float_t> _AK4CHSJet_CombMVA2Tags;
 		// TTreeReaderVectorValue<Int_t> _AK4CHSJet_PartonFlavour;
 		// TTreeReaderVectorValue<Int_t> _AK4CHSJet_HadronFlavour;
-	TTreeReaderVectorValue<Char_t> _AK4CHSJet_ID;
-	TTreeReaderVectorValue< Float_t> _AK4CHSJet_PUID;
+	// TTreeReaderVectorValue<Char_t> _AK4CHSJet_ID;
+	// TTreeReaderVectorValue< Float_t> _AK4CHSJet_PUID;
 		// TTreeReaderVectorValue<Char_t> _AK4CHSJet_PUFullID;
-	TTreeReaderVectorValue<Float_t> _AK4CHSJet_qgLikelihood;
+	// TTreeReaderVectorValue<Float_t> _AK4CHSJet_qgLikelihood;
 
 
 
@@ -129,6 +129,7 @@ private:
 	TTreeReaderVectorValue< Float_t> _phoR9Full5x5;
 	TTreeReaderVectorValue< Float_t> _phoIDMVA;
 	TTreeReaderVectorValue<UChar_t> _phoIDbit;
+	TTreeReaderVectorValue<Int_t> _pho_gen_index;
 
 
 	TTreeReaderVectorValue<Int_t> _AK8PuppiJet_Charge;
@@ -190,7 +191,7 @@ private:
 	// Float_t p_nAK4CHSJets_in_AK8PuppiJet_0p8;
 	// Float_t p_nAK4CHSJets_in_AK8PuppiJet_1p0;
 	// Float_t p_nAK4CHSJets_in_AK8PuppiJet_1p2;
-	Float_t p_nAK4CHSJets_40GeV;
+	// Float_t p_nAK4CHSJets_40GeV;
 	Float_t p_deltaR_AK8PuppiJetG;
 
 	Float_t phoEta_;
@@ -248,50 +249,64 @@ private:
 	Float_t pfMETPhi_;
 
 	Char_t leptVeto_;
-	Float_t vetoElePt_;
-	Float_t vetoEleEta_;
-	Float_t vetoElePhi_;
-	Float_t vetoMuPt_;
-	Float_t vetoMuEta_;
-	Float_t vetoMuPhi_;
-		// std::vector< Float_t> eleCalibPt_;
-		// std::vector< Float_t> eleEta_;
-		// std::vector< Float_t> elePhi_;
-		// std::vector< Float_t> eleCalibEn_;
-		// // std::vector< Float_t> eleIDMVAIso_;
-		// std::vector< UShort_t> eleIDbit_;
-		// std::vector< Float_t> muPt_;
-		// std::vector< Float_t> muEta_;
-		// std::vector< Float_t> muPhi_;
-		// std::vector< Float_t> muPt_;
-		// std::vector<Int_t> muIDbit_;
+	// Float_t vetoElePt_;
+	// Float_t vetoEleEta_;
+	// Float_t vetoElePhi_;
+	// Float_t vetoMuPt_;
+	// Float_t vetoMuEta_;
+	// Float_t vetoMuPhi_;
+	// std::vector< Float_t> eleCalibPt_;
+	// std::vector< Float_t> eleEta_;
+	// std::vector< Float_t> elePhi_;
+	// std::vector< Float_t> eleCalibEn_;
+	// // std::vector< Float_t> eleIDMVAIso_;
+	// std::vector< UShort_t> eleIDbit_;
+	// std::vector< Float_t> muPt_;
+	// std::vector< Float_t> muEta_;
+	// std::vector< Float_t> muPhi_;
+	// std::vector< Float_t> muPt_;
+	// std::vector<Int_t> muIDbit_;
+	// std::vector< Float_t> AK4CHSJet_Pt_;
+	// std::vector< Float_t> AK4CHSJet_En_;
+	// std::vector< Float_t> AK4CHSJet_Eta_;
+	// std::vector< Float_t> AK4CHSJet_Phi_;
+	// std::vector< Float_t> AK4CHSJet_deltaR_selectedAK8PuppiJet_;
+	// std::vector< Float_t> AK4CHSJet_ConsituentEtaPhiSpread_;
+	// std::vector< Float_t> AK4CHSJet_constituentPtDistribution_;
+	// std::vector< Float_t> AK4CHSJet_MaxConstituentDistance_;
+	// std::vector< Float_t> AK4CHSJet_CSV2BJetTags_;
+	// std::vector< Float_t> AK4CHSJet_DeepCSVTags_b_;
+	// std::vector< Float_t> AK4CHSJet_DeepCSVTags_bb_;
+	// std::vector< Float_t> AK4CHSJet_DeepCSVTags_c_;
+	// std::vector< Float_t> AK4CHSJet_DeepCSVTags_udsg_;
+	// std::vector< Float_t> AK4CHSJet_DeepFlavTags_bb_;
+	// std::vector< Float_t> AK4CHSJet_DeepFlavTags_bbb_;
+	// std::vector< Float_t> AK4CHSJet_DeepFlavTags_lepb_;
+	// std::vector< Float_t> AK4CHSJet_DeepFlavTags_c_;
+	// std::vector< Float_t> AK4CHSJet_DeepFlavTags_uds_;
+	// std::vector< Float_t> AK4CHSJet_DeepFlavTags_g_;
+	// std::vector< Float_t> AK4CHSJet_CombMVA2Tags_;
+	// std::vector<Int_t> AK4CHSJet_PartonFlavour_;
+	// std::vector<Int_t> AK4CHSJet_HadronFlavour_;
+	// std::vector<Char_t> AK4CHSJet_ID_;
+	// std::vector< Float_t> AK4CHSJet_PUID_;
+	// // std::vector<Char_t> AK4CHSJet_PUFullID_;
+	// std::vector< Float_t> AK4CHSJet_qgLikelihood_;
 
-	std::vector< Float_t> AK4CHSJet_Pt_;
-	std::vector< Float_t> AK4CHSJet_En_;
-	std::vector< Float_t> AK4CHSJet_Eta_;
-	std::vector< Float_t> AK4CHSJet_Phi_;
-	std::vector< Float_t> AK4CHSJet_deltaR_selectedAK8PuppiJet_;
-		// std::vector< Float_t> AK4CHSJet_ConsituentEtaPhiSpread_;
-		// std::vector< Float_t> AK4CHSJet_constituentPtDistribution_;
-		// std::vector< Float_t> AK4CHSJet_MaxConstituentDistance_;
-		// std::vector< Float_t> AK4CHSJet_CSV2BJetTags_;
-		// std::vector< Float_t> AK4CHSJet_DeepCSVTags_b_;
-		// std::vector< Float_t> AK4CHSJet_DeepCSVTags_bb_;
-		// std::vector< Float_t> AK4CHSJet_DeepCSVTags_c_;
-		// std::vector< Float_t> AK4CHSJet_DeepCSVTags_udsg_;
-		// std::vector< Float_t> AK4CHSJet_DeepFlavTags_bb_;
-		// std::vector< Float_t> AK4CHSJet_DeepFlavTags_bbb_;
-		// std::vector< Float_t> AK4CHSJet_DeepFlavTags_lepb_;
-		// std::vector< Float_t> AK4CHSJet_DeepFlavTags_c_;
-		// std::vector< Float_t> AK4CHSJet_DeepFlavTags_uds_;
-		// std::vector< Float_t> AK4CHSJet_DeepFlavTags_g_;
-		// std::vector< Float_t> AK4CHSJet_CombMVA2Tags_;
-		// std::vector<Int_t> AK4CHSJet_PartonFlavour_;
-		// std::vector<Int_t> AK4CHSJet_HadronFlavour_;
-	std::vector<Char_t> AK4CHSJet_ID_;
-	std::vector< Float_t> AK4CHSJet_PUID_;
-		// std::vector<Char_t> AK4CHSJet_PUFullID_;
-	std::vector< Float_t> AK4CHSJet_qgLikelihood_;
+	Float_t selectedPhoGenPt_;
+	Float_t selectedPhoGenEta_;
+	Float_t selectedPhoGenPhi_;
+	Float_t selectedPhoGenE_;
+
+	Float_t selectedAk8JetGenPt_;
+	Float_t selectedAk8JetGenEta_;
+	Float_t selectedAk8JetGenPhi_;
+	Float_t selectedAk8JetGenE_;
+	Float_t selectedAk8JetGenMass_;
+
+	Float_t deltaR_selectedGenAK8PuppiJet_GenGamma_;
+
+	Float_t genMET_;
 
 
 
@@ -301,8 +316,6 @@ private:
 
 
 	/***********************************************BoostedJet+G histograms***********************************/
-
-
 	plot_variable 	 	var_phoCalibEt{phoCalibEt_, 200., 1500., 130, "p_{T}(\\gamma)", "GeV"},
 	var_phoEta{phoEta_, ECAL_ETA_BINS, 27, "\\eta(\\gamma)"},
 	var_phoPhi{phoPhi_, -3.15, 3.15, 63, "\\phi(\\gamma)"},
@@ -317,15 +330,21 @@ private:
 	var_AK8PuppiJet_tau32{p_AK8PuppiJet_tau32, 0., 1., 100, "\\tau_{32}(ak^{8}_{T}\\ jet)"},
 	var_AK8PuppiJet_tau43{p_AK8PuppiJet_tau43, 0., 1., 100, "\\tau_{43}(ak^{8}_{T}\\ jet)"},
 	var_AK8PuppiJet_CSVv2{AK8PuppiJet_CSV_, -2., 2., 400, "CSV_{v2}(ak^{8}_{T}\\ jet)"},
-	// var_nAK4CHSJets_in_AK8PuppiJet_1p0{p_nAK4CHSJets_in_AK8PuppiJet_1p0, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.0\\ of\\ ak_{T}^{8}\\ jet"},
-	// var_nAK4CHSJets_in_AK8PuppiJet_0p8{p_nAK4CHSJets_in_AK8PuppiJet_0p8, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<0.8\\ of\\ ak_{T}^{8}\\ jet"},
-	// var_nAK4CHSJets_in_AK8PuppiJet_1p2{p_nAK4CHSJets_in_AK8PuppiJet_1p2, 0., 5., 5, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ (p_{T}>40GeV)\\ within\\ \\Delta R<1.2\\ of\\ ak_{T}^{8}\\ jet"},
-	var_nAK4CHSJets_40GeV{p_nAK4CHSJets_40GeV, 0., 20., 20, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ with\\ p_{T}>40\\ GeV"},
+	// var_nAK4CHSJets_40GeV{p_nAK4CHSJets_40GeV, 0., 20., 20, "N^{o}\\ of\\ ak_{T}^{4} \\ jets\\ with\\ p_{T}>40\\ GeV"},
 	var_deltaR_AK8PuppiJetG{p_deltaR_AK8PuppiJetG, 0., 5., 50, "\\Delta{R}(ak^{8}_{T}\\ jet, \\gamma)"},
 	var_AK8PuppiJet_nb1ecf2_{AK8PuppiJet_nb1ecf2_, 0., 5., 500, "ECF(2,\\beta=1)"},
 	var_AK8PuppiJet_nb1ecf3_{AK8PuppiJet_nb1ecf3_, 0., 5., 500, "ECF(3,\\beta=1)"},
 	var_AK8PuppiJet_nb2ecf2_{AK8PuppiJet_nb2ecf2_, 0., 5., 500, "ECF(2,\\beta=2)"},
-	var_AK8PuppiJet_nb2ecf3_{AK8PuppiJet_nb2ecf3_, 0., 5., 500, "ECF(3,\\beta=2)"};
+	var_AK8PuppiJet_nb2ecf3_{AK8PuppiJet_nb2ecf3_, 0., 5., 500, "ECF(3,\\beta=2)"},
+	var_selectedPhoGenPt_{selectedPhoGenPt_, 200., 1500., 130, "p_{T}(gen\\ \\gamma)", "GeV"},
+	var_selectedPhoGenEta_{selectedPhoGenEta_,  ECAL_ETA_BINS, 27, "\\eta(gen\\ \\gamma)"},
+	var_selectedPhoGenPhi_{selectedPhoGenPhi_, -3.15, 3.15, 63, "\\phi(gen\\ \\gamma)"},
+	var_selectedAk8JetGenPt_{selectedAk8JetGenPt_, 200., 1500., 130, "p_{T}(gen\\ ak^{8}_{T}\\ jet)", "GeV"},
+	var_selectedAk8JetGenEta_{selectedAk8JetGenEta_, -2.5, 2.5, 25, "\\eta(gen\\ ak^{8}_{T}\\ jet)"},
+	var_selectedAk8JetGenPhi_{selectedAk8JetGenPhi_, -3.15, 3.15, 63, "\\phi(gen\\ ak^{8}_{T}\\ jet)"},
+	var_selectedAk8JetGenMass_{selectedAk8JetGenMass_, 0., 500., 500, "Mass(gen\\ ak^{8}_{T}\\ jet)", "GeV"},
+	var_deltaR_selectedGenAK8PuppiJet_GenGamma_{deltaR_selectedGenAK8PuppiJet_GenGamma_, 0., 5., 50, "\\Delta{R}(gen\\ ak^{8}_{T}\\ jet,\\ gen\\ \\gamma)"},
+	var_genMET_{genMET_, 0., 2000., 2000, "gen #slash{E}_{T}", "GeV"};
 
 
 	std::vector<histogram_template> boostedJetG_1d_Histograms = {
@@ -347,11 +366,21 @@ private:
 		{var_AK8PuppiJet_nb2ecf2_},
 		{var_AK8PuppiJet_nb2ecf3_},
 		{var_AK8PuppiJet_CSVv2},
-		{var_nAK4CHSJets_40GeV},
-		// {var_nAK4CHSJets_in_AK8PuppiJet_0p8},
-		// {var_nAK4CHSJets_in_AK8PuppiJet_1p0},
-		// {var_nAK4CHSJets_in_AK8PuppiJet_1p2},
-		{var_deltaR_AK8PuppiJetG}
+		// {var_nAK4CHSJets_40GeV},
+		{var_deltaR_AK8PuppiJetG},
+
+	};
+
+	std::vector<histogram_template> boostedJetG_1d_GenHistograms ={
+		{var_selectedPhoGenPt_},
+		{var_selectedPhoGenEta_},
+		{var_selectedPhoGenPhi_},
+		{var_selectedAk8JetGenPt_},
+		{var_selectedAk8JetGenEta_},
+		{var_selectedAk8JetGenPhi_},
+		{var_selectedAk8JetGenMass_},
+		{var_deltaR_selectedGenAK8PuppiJet_GenGamma_},
+		{var_genMET_}
 	};
 
 

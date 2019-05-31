@@ -35,13 +35,22 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	std::cout<<"\t\tIsMC: "<<isMC<<std::endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
-	Float_t _xSec = -999.;
+	Float_t _xSec = -9999.;
 	if(isMC){
 		std::string _sampleName = getFileName(_file);
 		_sampleName = findAndReplaceAll(_sampleName, ".root", "");
-		_xSec = std::stod(vLookup(_sampleName, _xSecMap, 0, 1));
+		std::string _xSecString = vLookup(_sampleName, _xSecMap, 0, 1);
+		if(_xSecString.empty()) {
+			std::cout<<"\t\tError! Cross section for "<<_sampleName<<" not found in "<< _xSecMap<<std::endl;
+			return;
+		}
+		_xSec = std::stod(_xSecString);
 	}
 	std::cout<<"\t\tCross section: "<<_xSec<<std::endl;
+	if(isMC && _xSec < 0.){
+		std::cout<<"Error! Negative cross section!"<<std::endl;
+		return;
+	}
 	///////////////////////////////////////////////////////////////////////////////////
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +88,11 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	TTreeReaderAnyValue<Float_t>        AK8PuppiJet_DDCvBTags_Hcc(inputTTreeReader, "AK8PuppiJet_DDCvBTags_Hcc");
 	TTreeReaderAnyValue<Float_t>        AK8PuppiJet_DDBDTags_bbcsLight(inputTTreeReader, "AK8PuppiJet_DDBDTags_bbcsLight");
 	TTreeReaderAnyValue<Float_t>        AK8PuppiJet_DDBDTags_ccvsLight(inputTTreeReader, "AK8PuppiJet_DDBDTags_ccvsLight");
+	TTreeReaderAnyValue<Int_t> 			AK8PuppiJet_PartonFlavour;
+	if(isMC) 							AK8PuppiJet_PartonFlavour.set(inputTTreeReader, "AK8PuppiJet_PartonFlavour");
+	TTreeReaderAnyValue<Int_t> 			AK8PuppiJet_HadronFlavour;
+	if(isMC) 							AK8PuppiJet_HadronFlavour.set(inputTTreeReader, "AK8PuppiJet_HadronFlavour");
+	TTreeReaderAnyValue<UChar_t> 		isGenBtagged(inputTTreeReader, "isGenBtagged");
 	TTreeReaderAnyValue<Float_t>        pfMET(inputTTreeReader, "pfMET");
 	TTreeReaderAnyValue<Float_t>        pfMETPhi(inputTTreeReader, "pfMETPhi");
 	///////////////////////////////////////////////////////////////////////////////////
@@ -114,13 +128,23 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	Float_t	AK8PuppiJet_DDCvBTags_cc_;
 	Float_t	AK8PuppiJet_DDBDTags_bbcsLight_;
 	Float_t	AK8PuppiJet_DDBDTags_ccvsLight_;
+	Float_t AK8PuppiJet_PartonFlavour_;
+	Float_t AK8PuppiJet_HadronFlavour_;
 	Float_t	pfMET_;
 	Float_t	pfMETPhi_;
-///////////////////////////////////////////////////////////////////////////////////
+	Bool_t isGenSingleBTagged_= 0.;
+	Bool_t isGenDoubleBTagged_ = 0.;
+	Bool_t isRecoDoubleBtagged_= 0.;
+	Bool_t isRecoSingleBtagged_= 0.;
+
+	Float_t p_isGenBtagged_;
+	Float_t p_isRecoBtagged_;
+	///////////////////////////////////////////////////////////////////////////////////
 
 
 	///////////////////////////////////////////////////////////////////////////////////
 	plot_variable 	 	var_phoCalibEt{phoCalibEt_, 200., 1500., 130, "p_{T}(\\gamma)", "GeV"},
+	var_phoCalibEt_unNorm{phoCalibEt_, 200., 1500., 130, "Unweighted\\ p_{T}(\\gamma)", "GeV"},
 	var_phoEta{phoEta_, ECAL_ETA_BINS, 27, "\\eta(\\gamma)"},
 	var_phoPhi{phoPhi_, -3.15, 3.15, 63, "\\phi(\\gamma)"},
 	var_AK8PuppiJet_Pt{AK8PuppiJet_Pt_, 200., 1500., 130, "p_{T}(ak^{8}_{T}\\ jet)", "GeV"},
@@ -143,8 +167,12 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	var_AK8PuppiJet_DDCvBTags_cc{AK8PuppiJet_DDCvBTags_cc_, 0., 1., 100, "DDC vs B: cc"},
 	var_AK8PuppiJet_DDBDTags_bbcsLight{AK8PuppiJet_DDBDTags_bbcsLight_, 0., 1., 100, "DDBD bb vs L"},
 	var_AK8PuppiJet_DDBDTags_ccvsLight{AK8PuppiJet_DDBDTags_ccvsLight_, 0., 1., 100, "DDBD cc vs L"},
+	var_AK8PuppiJet_HadronFlavour_{AK8PuppiJet_HadronFlavour_, -100, 100, 200, "ak^{8}_{T} jet hadron flavor"},
+	var_AK8PuppiJet_PartonFlavour_{AK8PuppiJet_PartonFlavour_, -100, 100, 200, "ak^{8}_{T} jet parton flavor"},
 	var_MET{pfMET_, 0., 1500., 1500, "#slash{E}_{T}", "GeV"},
-	var_METPhi{pfMETPhi_, -3.15, 3.15, 63, "#phi(#slash{E}_{T})"};
+	var_METPhi{pfMETPhi_, -3.15, 3.15, 63, "#phi(#slash{E}_{T})"},
+	var_p_isGenBtagged_{p_isGenBtagged_, 0., 4., 4, "Is Gen b tagged"},
+	var_p_isRecoBtagged_{p_isRecoBtagged_, 0., 4., 4, "Is Reco b tagged"};
 
 	std::vector<histogram_template> boostedJetG_1d_Histograms = {
 		{var_phoCalibEt},
@@ -171,12 +199,23 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 		{var_AK8PuppiJet_DDBDTags_bbcsLight},
 		{var_AK8PuppiJet_DDBDTags_ccvsLight},
 		{var_MET},
-		{var_METPhi}
+		{var_METPhi},
+		{var_p_isGenBtagged_},
+		{var_p_isRecoBtagged_}
 	};
 
+	histogram_template	hist_var_phoCalibEt_unNorm(var_phoCalibEt_unNorm);
+
 	std::vector<twoDhistogram_template> boostedJetG_2d_Histograms ={
-		{var_phoCalibEt, var_deltaR_AK8PuppiJet_G},
-		{var_phoCalibEt, var_METPhi}
+		// {var_p_isGenBtagged_, var_AK8PuppiJet_pfBoostedDSVBTag},
+		// {var_p_isGenBtagged_, var_AK8PuppiJet_DDBvLTags_bb},
+		// {var_p_isGenBtagged_, var_AK8PuppiJet_DDCvBTags_bb},
+		// {var_p_isGenBtagged_, var_AK8PuppiJet_DDBDTags_bbcsLight},
+		// {var_p_isGenBtagged_, var_AK8PuppiJet_CSVv2},
+		{var_p_isGenBtagged_, var_p_isRecoBtagged_}
+
+		// {var_phoCalibEt, var_deltaR_AK8PuppiJet_G},
+		// {var_phoCalibEt, var_METPhi}
 	};
 	///////////////////////////////////////////////////////////////////////////////////
 
@@ -184,13 +223,17 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	std::string outFileName = _outDir + "/" + getFileName(_file);
 	TFile *outFile = new TFile(outFileName.c_str(), "RECREATE");
 
-	std::cout<<"Initializing TH1D for boosted Jet + gamma channel..."<<std::endl;
+	std::cout<<"Initializing TH1F for boosted Jet + gamma channel..."<<std::endl;
 	for(auto & hist1d : boostedJetG_1d_Histograms){
 		hist1d.initializehist();
 		hist1d.hist->SetDirectory(outFile->GetDirectory(""));
 	}
 
-	std::cout<<"Initializing TH2D for boosted Jet + gamma channel..."<<std::endl;
+
+	hist_var_phoCalibEt_unNorm.initializehist();
+	hist_var_phoCalibEt_unNorm.hist->SetDirectory(outFile->GetDirectory(""));
+
+	std::cout<<"Initializing TH2F for boosted Jet + gamma channel..."<<std::endl;
 	for(auto & hist2d : boostedJetG_2d_Histograms){
 		hist2d.initializehist();
 		hist2d.hist->SetDirectory(outFile->GetDirectory(""));
@@ -225,6 +268,11 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	miniTree->Branch("AK8PuppiJet_DDCvBTags_cc", &AK8PuppiJet_DDCvBTags_cc_);
 	miniTree->Branch("AK8PuppiJet_DDBDTags_bbcsLight", &AK8PuppiJet_DDBDTags_bbcsLight_);
 	miniTree->Branch("AK8PuppiJet_DDBDTags_ccvsLight", &AK8PuppiJet_DDBDTags_ccvsLight_);
+	miniTree->Branch("isGenSingleBTagged", &isGenSingleBTagged_);
+	miniTree->Branch("isGenDoubleBTagged", &isGenDoubleBTagged_);
+	miniTree->Branch("isRecoDoubleBtagged", &isRecoDoubleBtagged_);
+	miniTree->Branch("isRecoSingleBtagged", &isRecoSingleBtagged_);
+
 	std::cout<<"Created miniTree for limit computation..."<<std::endl;
 	///////////////////////////////////////////////////////////////////////////////////
 
@@ -232,7 +280,7 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 
 	///////////////////////////////////////////////////////////////////////////////////
 	TH1F *h_genWeightSum = (TH1F*) getHistFromFile("sumGenWeights", _file);
-	h_genWeightSum->SetDirectory(outFile->GetDirectory(""));
+	// h_genWeightSum->SetDirectory(outFile->GetDirectory(""));
 	Double_t _sumGenWeight = h_genWeightSum->GetBinContent(1);
 	std::cout<<"\t\tSum of gen weights: "<<_sumGenWeight<<std::endl;
 	///////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +293,29 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 		if(current_entry % REPORT_EVERY == 0){
 			std::cout<<"\t\t\t Analyzing entry "<<current_entry<<std::endl;
 		}
+
+		if(std::abs((phoEta)) > BETRetaMin) continue;
+		if((phoCalibEt) < 400.) continue;
+		if((phoCalibEt) > 1000.) continue;
+		if((deltaR_AK8PuppiJetG) < 2.5) continue;
+
+		if(isMC){
+			UChar_t _tmpisGenBtagged_ = isGenBtagged;
+			isGenDoubleBTagged_ = getBit( _tmpisGenBtagged_, 2);
+			isGenSingleBTagged_ = getBit( _tmpisGenBtagged_, 3);
+		}
+
+		isRecoDoubleBtagged_ = ((AK8PuppiJet_DDBDTags_bbcsLight) > 0.9);
+		isRecoSingleBtagged_ = ((AK8PuppiJet_CSV) > 0.9);
+
+		// if(!isGenSingleBTagged_ || isGenDoubleBTagged_) continue;
+		// if(!isGenDoubleBTagged_) continue;
+		// if(isGenSingleBTagged_ || isGenDoubleBTagged_) continue;
+
+		if(!isRecoSingleBtagged_ || isRecoDoubleBtagged_) continue;
+		// if(!isRecoDoubleBtagged_) continue;
+		// if(isRecoSingleBtagged_ || !isRecoDoubleBtagged_) continue;
+		// if(isRecoSingleBtagged_ || isRecoDoubleBtagged_) continue;
 
 		run_ = run;
 		event_ = event;
@@ -274,12 +345,30 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 		AK8PuppiJet_DDCvBTags_cc_ = AK8PuppiJet_DDCvBTags_Hcc;
 		AK8PuppiJet_DDBDTags_bbcsLight_ = AK8PuppiJet_DDBDTags_bbcsLight;
 		AK8PuppiJet_DDBDTags_ccvsLight_ = AK8PuppiJet_DDBDTags_ccvsLight;
+		AK8PuppiJet_HadronFlavour_ = (isMC) ? (AK8PuppiJet_HadronFlavour) : -999;
+		AK8PuppiJet_PartonFlavour_ = (isMC) ? (AK8PuppiJet_PartonFlavour) : -999;
 		pfMET_ = pfMET;
 		pfMETPhi_ = pfMETPhi;
+
+
+		if(!isGenDoubleBTagged_ && !isGenSingleBTagged_) p_isGenBtagged_ = 0.0001;
+		else if(isGenDoubleBTagged_ && isGenSingleBTagged_) p_isGenBtagged_ = 1. + 0.0001;
+		else if(!isGenDoubleBTagged_ && isGenSingleBTagged_) p_isGenBtagged_ = 2. + 0.0001;
+		else if(isGenDoubleBTagged_ && !isGenSingleBTagged_) p_isGenBtagged_ = 3. + 0.0001;
+
+		if(!isRecoDoubleBtagged_ && !isRecoSingleBtagged_) p_isRecoBtagged_ = 0.0001;
+		else if(isRecoDoubleBtagged_ && isRecoSingleBtagged_) p_isRecoBtagged_ = 1. + 0.0001;
+		else if(!isRecoDoubleBtagged_ && isRecoSingleBtagged_) p_isRecoBtagged_ = 2. + 0.0001;
+		else if(isRecoDoubleBtagged_ && !isRecoSingleBtagged_) p_isRecoBtagged_ = 3. + 0.0001;
+
+
+
 
 		for(auto & hist :  boostedJetG_1d_Histograms){
 			hist.fill(weight_);
 		}
+
+		hist_var_phoCalibEt_unNorm.fill();
 
 		for(auto & hist2D : boostedJetG_2d_Histograms){
 			hist2D.fill(weight_);
@@ -294,13 +383,15 @@ void postSelect(std::string _file, std::string _outDir, std::string _xSecMap){
 	outFile->Write();
 	outFile->Close();
 
+	h_genWeightSum->Delete();
+
 	std::cout<<"Written results to "<<outFileName<<std::endl;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void eventPostselector(std::string _preSelectedList	="/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/preSelectedListForMiniTree.txt",	std::string	_outDir="/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/miniTree", std::string _xSecMap="/scratch/mwadud/anTGCpreselector/data/meanXsections_flatKfactor1.3.txt"){
+void eventPostselector(std::string _preSelectedList	="/scratch/mwadud/anTGCpreselector/out/preSelected_GenBtaggingStudyModifiedDoubleBTagger//preSelectedList.txt",	std::string	_outDir="/scratch/mwadud/anTGCpreselector/out/preSelected_GenBtaggingStudyModifiedDoubleBTagger/miniTreeEBRecoSingleBTag/", std::string _xSecMap="/scratch/mwadud/anTGCpreselector/data/xSec_1.3kfacOnbgOnly.csv"){
 	CSVReader preSlectedColumns(_preSelectedList);
 	std::vector<std::vector<std::string>> preSelectedBinnedSamples = preSlectedColumns.getData();
 
@@ -313,6 +404,10 @@ void eventPostselector(std::string _preSelectedList	="/scratch/mwadud/anTGCprese
 		}
 	}
 
+	// std::vector<std::string> preSelectedBins = getNonemptyLines("/scratch/mwadud/anTGCpreselector/out/preSelected_GenBtaggingStudyModifiedDoubleBTagger/SinglePhoton2017_preSelected.txt");
+	// for(std::string & inFile : preSelectedBins){
+	// 	postSelect(inFile, _outDir, _xSecMap);
+	// }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #endif

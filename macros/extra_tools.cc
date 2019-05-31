@@ -54,8 +54,10 @@
 
 /*************************************************************Declarations*************************************************************/
 Double_t deltaR(Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
-void setBit(UChar_t & _container, UChar_t _pos, Bool_t _bitVal=1);
-Bool_t getBit(UChar_t _container, UChar_t _pos);
+template <typename anytype1, typename anytype2>
+void setBit(anytype1 & _container, anytype2 _pos, Bool_t _bitVal);
+template <typename anytype1, typename anytype2>
+Bool_t getBit(anytype1 _container, anytype2 _pos);
 std::string removeNonAlpha(std::string word);
 template <class any_number>
 std::string removeTrailingZeros(any_number number);
@@ -76,7 +78,7 @@ TH1* getHistFromFile(std::string _histName, std::string _filename, Bool_t _verbo
 TObject *getObjectFromFile(std::string _objectName, std::string _filename);
 TH1* rebinHist(TH1* _hist, Double_t _statUnc);
 TH1* rebinHist(TH1* _hist, std::vector<Double_t> _newBins);
-std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc);
+std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc, Double_t _reScale = -999.);
 Double_t sumNextNbins(TH1* _hist, UInt_t _n, UInt_t _curr);
 void copyHistAtts(TH1* _source, TH1* _mock);
 Double_t getSumW(std::string _cutflowfile);
@@ -582,6 +584,16 @@ struct parseOptions {
 
 	parseOptions(){};
 
+	Bool_t keyExists(std::string _key){
+		if ( optMap.find(_key) == optMap.end() ) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+
+
+
 	void parseIt(std::string _optFile){
 		std::cout<<"\t\tOptions parsed from file "<<_optFile<<"... ";
 		CSVReader _csvFile(_optFile);
@@ -597,14 +609,17 @@ struct parseOptions {
 	};
 
 	Float_t getFloat(std::string _opt){
-		return std::stof(optMap.at(_opt));
+		return std::stof(get(_opt));
 	};
 
 	Int_t getInt(std::string _opt){
-		return std::stoi(optMap.at(_opt));
+		return std::stoi(get(_opt));
 	};
 
 	std::string get(std::string _opt){
+		if(!keyExists(_opt)){
+			cout<<"Error! Key "<<_opt<<" not found!"<<std::endl;
+		}
 		return optMap.at(_opt);
 	};
 };
@@ -900,7 +915,13 @@ TH1* rebinHist(TH1* _hist, std::vector<Double_t> _newBins){
 };
 
 
-std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc){
+std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc, Double_t _reScale){
+
+	TH1 *reScaled = (TH1*)_hist->Clone("reScaled");
+	if(_reScale > 0.) {
+		reScaled->Scale(_reScale / reScaled->Integral(0, reScaled->GetNbinsX()));
+		_hist = reScaled;
+	}
 	UInt_t _nBins = _hist->GetXaxis()->GetNbins();
 	if (_nBins == 0) {
 		std::cout<<"\t Hist "<<_hist->GetName()<<" has no bins!"<<std::endl;
@@ -941,6 +962,7 @@ std::vector<Double_t> getGoodBins(TH1* _hist, Double_t _statUnc){
 		//erase second last element
 		good_bins.erase(good_bins.begin() + good_bins.size()-2);
 	};
+	reScaled->Delete();
 	return good_bins;
 };
 
@@ -1468,12 +1490,15 @@ TH1F *mergeBins(std::string _fileList, std::string _histName, std::string _sumWe
 		TH1F *_binHist = (TH1F*) getHistFromFile(_histName, _file);
 		_binHist->Scale(_xSection/_sumW);
 
+		Double_t _integral = _binHist->Integral();
+
 		_mergedHist->Add(_binHist);
 
 		_binHist->Delete();
 
-		std::cout<<"\t\t"<<_file<<":\t xSection = "<<_xSection<<"\t\tSumW = "<<_sumW<<std::endl;
+		std::cout<<"\t\t"<<_file<<":\t xSection = "<<_xSection<<"\t\tSumW = "<<_sumW<<"\t\t Integral = "<< _integral<<std::endl;
 	}
+
 	std::cout<<"\t\tMerged all bins! Integral = "<<_mergedHist->Integral()<<std::endl;
 
 	return _mergedHist;
