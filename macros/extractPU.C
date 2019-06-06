@@ -1,0 +1,59 @@
+#include "extra_tools.cc"
+
+std::string INFILES="";
+std::string OUTFILE="";
+std::string HISTNAME="ggNtuplizer/hPUTrue";
+
+
+void extractPU(std::string _inFileList=INFILES, std::string _outFile=OUTFILE, std::string _histName = HISTNAME);
+void batchExtractPU(std::string _inLists, std::string _outDir, std::string _histName = HISTNAME);
+
+
+
+void extractPU(std::string _inFileList, std::string _outFile, std::string _histName){
+
+	std::cout<<"Extracting pileup histograms from ntuples listed in "<<_inFileList<<std::endl;
+
+	std::vector<std::string> ntuples = getNonemptyLines(_inFileList);
+
+	TH1F *puHist = (TH1F*) getHistFromFile(_histName, ntuples[0], 0);
+
+	if(!puHist) {
+		std::cout<<"Error! Cannot read "<<_histName<<" from "<<ntuples[0]<<std::endl;
+		return;
+	}
+
+	for(UInt_t i = 1; i < ntuples.size(); i++){
+		TH1F *puHist_i = (TH1F*) getHistFromFile(_histName, ntuples[i], 0);
+
+		if(!puHist_i) {
+			std::cout<<"Error! Cannot read "<<_histName<<" from "<<ntuples[i]<<std::endl;
+			continue;
+		}
+
+		puHist->Add(puHist_i);
+		puHist_i->Delete();
+	}
+
+	writeToFile(puHist, _outFile);
+
+	std::cout<<" \t Entries = "<<puHist->GetEntries()<<std::endl;
+
+	puHist->Delete();
+};
+
+
+
+
+void batchExtractPU(std::string _inLists, std::string _outDir, std::string _histName){
+
+	std::vector<std::string> ntupleLists = getLinesRegex(_inLists, "^((?!SinglePhoton).)*$");
+
+	mkdir(_outDir);
+
+	for(std::string it : ntupleLists){
+		std::string outFile = _outDir + "/" + getFileName(it);
+		outFile = findAndReplaceAll(outFile, ".txt", ".root");
+		extractPU(it, outFile, _histName);
+	}
+};

@@ -1,10 +1,10 @@
 #include "extra_tools.cc"
 
-// std::string INFILE="../data/xSections.txt";
-// std::string OUTFILE="../data/meanXsections.txt";
+// std::string INFILE="../data/anTGCmetSignalXsecs.txt";
+// std::string OUTFILE="../data/anTGCmetSignalMeweanXsecs.txt";
 
-std::string INFILE="../data/2019_higherCouplings.txt";
-std::string OUTFILE="../data/2019_higherCouplings_meanXsecs.txt";
+std::string INFILE="../data/anTGCmetBackgroundXsecs.txt";
+std::string OUTFILE="../data/anTGCmetBackgroundMeanXsecs.txt";
 
 void calcXsec(std::string _inFile=INFILE, std::string _outFile=OUTFILE){
 	CSVReader _infileCSV(_inFile);
@@ -71,9 +71,9 @@ void calcXsec(std::string _inFile=INFILE, std::string _outFile=OUTFILE){
 		Double_t _varXsec = std::get<4>(sample.second) /_denom;
 		Double_t _errorXsec = std::sqrt(_varXsec);
 
-		std::cout<<sample.first<<","<< _meanXsec <<","<<_errorXsec<<","<< to_string_with_precision(std::get<3>(_xSecMap[_sampleName]), 0) <<std::endl;
+		std::cout<<sample.first<<std::setprecision(20) <<","<< _meanXsec <<","<<_errorXsec<<","<< to_string_with_precision(std::get<3>(_xSecMap[_sampleName]), 0) <<std::endl;
 
-		_fileout<<sample.first<<","<<_meanXsec<<","<<_errorXsec<<","<<to_string_with_precision(std::get<3>(_xSecMap[_sampleName]), 0)<<std::endl;
+		_fileout<<sample.first<<std::setprecision(20) <<","<<_meanXsec<<","<<_errorXsec<<","<<to_string_with_precision(std::get<3>(_xSecMap[_sampleName]), 0)<<std::endl;
 	}
 	_fileout.close();
 }

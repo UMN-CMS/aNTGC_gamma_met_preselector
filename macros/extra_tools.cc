@@ -48,12 +48,15 @@
 #include <stdio.h>
 #include <iterator>
 #include <string>
+#include <chrono>
+#include <ctime>
 
 
 
 
 /*************************************************************Declarations*************************************************************/
 Double_t deltaR(Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
+Double_t deltaPhi(Double_t phi1, Double_t phi2);
 template <typename anytype1, typename anytype2>
 void setBit(anytype1 & _container, anytype2 _pos, Bool_t _bitVal);
 template <typename anytype1, typename anytype2>
@@ -124,6 +127,8 @@ Bool_t branchExists(std::string _branchName, TTree *_tree);
 Float_t getMean(std::vector<Float_t> _set);
 template <class ObjType>
 ObjType copyObjectDeleteSrc(ObjType *_original);
+Short_t findSecondaryIndex(Short_t searchIndex, std::vector<Short_t> container);
+std::string getCurrentTime();
 
 
 struct JJG_EventClass;
@@ -145,6 +150,8 @@ struct Profile2D;
 struct parseOptions;
 
 class CSVReader;
+
+class PileupReWeighting;
 
 
 const std::map<std::string, Double_t> xsec_unit_map = {
@@ -185,6 +192,7 @@ struct TTreeReaderAnyValue{
 	TTreeReaderAnyValue(){};
 	~TTreeReaderAnyValue(){
 		delete val;
+		val = nullptr;
 	};
 	void set(TTreeReader & ttreereader, std::string branchname){
 		val = new TTreeReaderValue<anytype>(ttreereader,branchname.c_str());
@@ -226,6 +234,7 @@ struct TTreeReaderArrayValue{
 	TTreeReaderArrayValue(){};
 	~TTreeReaderArrayValue(){
 		delete val;
+		val = nullptr;
 	};
 	void set(TTreeReader & ttreereader, std::string branchname){
 		val = new TTreeReaderArray<anytype>(ttreereader,branchname.c_str());
@@ -625,11 +634,69 @@ struct parseOptions {
 };
 
 
+class PileupReWeighting {
+public:
+
+	PileupReWeighting( ){ };
+
+	PileupReWeighting( std::string mcFile, std::string dataFile, std::string mcHistName, std::string dataHistName){
+		init(mcFile, dataFile, mcHistName, dataHistName);
+	};
+
+	void init( std::string mcFile, std::string dataFile, std::string mcHistName, std::string dataHistName){
+
+		std::cout<<"************************************************************************************"<<std::endl<<
+		"\t\tCreating Pileup Reweighter with "<<std::endl<<
+		"\t\t\tdata histogram "<< dataHistName<<" from file "<<dataFile<<std::endl<<
+		"\t\t\tmc histogram "<< mcHistName<<" from file "<<mcFile<<std::endl<<
+		"************************************************************************************"<<std::endl;
+
+		weights_ = (TH1F*) getHistFromFile(dataHistName, dataFile);
+		MC_distr_ = (TH1F*) getHistFromFile(mcHistName, mcFile);
+
+		weights_->Scale( 100.0/ weights_->Integral() );
+		MC_distr_->Scale( 100.0/ MC_distr_->Integral() );
+
+		weights_->SetName("pileupWeights");
+		weights_->Divide(MC_distr_);
+
+		delete MC_distr_;
+		MC_distr_ = nullptr;
+
+		std::cout << "\t\tPileup weights: " << std::endl;
+
+		int NBins = weights_->GetNbinsX();
+
+		for(int ibin = 1; ibin<NBins+1; ++ibin){
+			std::cout << "\t\t\t" << ibin-1 << "\t" << weights_->GetBinContent(ibin) << std::endl;
+		}
+	};
+
+	Double_t weight( Float_t n_int ){
+		Int_t bin = weights_->GetXaxis()->FindBin(n_int + 0.1);
+		return weights_->GetBinContent(bin);
+	}
+
+	~PileupReWeighting(){
+		delete weights_;
+	};
+
+protected:
+	TH1F	*weights_	= nullptr;
+	TH1F	*MC_distr_	= nullptr;
+};
+
+
 Double_t deltaR(Double_t _eta1, Double_t _phi1, Double_t _eta2, Double_t _phi2){
 	Double_t _deltaEta = _eta1 - _eta2;
 	Double_t _deltaPhi = _phi1 - _phi2;
 	Double_t _deltaR = std::sqrt(_deltaEta*_deltaEta + _deltaPhi*_deltaPhi);
 	return _deltaR;
+};
+
+
+Double_t deltaPhi(Double_t phi1, Double_t phi2){
+	return std::abs(phi2-phi1);
 };
 
 
@@ -875,6 +942,12 @@ std::vector<std::string> getLinesRegex(std::string _filepath, std::string _regex
 
 TH1* getHistFromFile(std::string _histName, std::string _filename, Bool_t _verbose){
 	TFile _file(_filename.c_str(), "READ");
+
+	// if(!_file.GetListOfKeys()->Contains(_histName.c_str())){
+	// 	if(_verbose)std:cout<<"\tError! "<<_filename<<" does not contain object named "<<_histName<<std::endl;
+	// 	return nullptr;
+	// }
+
 	TH1* _hist = (TH1*) _file.Get(_histName.c_str());
 	_hist->SetDirectory(0);
 	_file.Close();
@@ -1628,6 +1701,23 @@ ObjType copyObjectDeleteSrc(ObjType *_original){
 	ObjType _copy(*_original);
 	_original->Delete();
 	return _copy;
+};
+
+
+Short_t findSecondaryIndex(Short_t searchIndex, std::vector<Short_t> container){
+	Short_t secondaryIndex = -999;
+	for(Int_t i = 0; i < container.size(); i++){
+		if( container[i] ==  searchIndex) secondaryIndex = i;
+	}
+	return secondaryIndex;
+};
+
+
+std::string getCurrentTime(){
+	std::chrono::time_point<std::chrono::system_clock> _now = std::chrono::system_clock::now();
+	std::time_t _now_ = std::chrono::system_clock::to_time_t(_now);
+	std::string c_time = std::ctime(&_now_);
+	return c_time;
 };
 
 #endif

@@ -8,39 +8,9 @@ Int_t findSecondaryIndex(Int_t searchIndex, std::vector<Int_t> container){
 	Int_t secondaryIndex = -999;
 	for(Int_t i = 0; i < container.size(); i++){
 		if( container[i] ==  searchIndex) secondaryIndex = i;
+		break;
 	}
 	return secondaryIndex;
-};
-
-
-Bool_t aNTGCpreselector::phoIsDirectPromptDeltaR0p05(){
-	Int_t _nMC = _mcStatus.size();
-	for(Int_t i= 0; i < _nMC; i++){
-		if(((_mcPID[i]) == 22) && ((_mcStatus[i]) == 1) && ((std::abs((_mcMomPID[i])) <= 22) || (std::abs((_mcMomPID[i])) == 2212))){
-			for(Int_t j =0; j < _nMC; j++){
-				if((_mcPID[j]) == 21 || std::abs((_mcPID[j])) < 7){
-					Float_t _deltaR = deltaR(_mcEta[i], _mcPhi[i], _mcEta[j], _mcPhi[j]);
-					if(_deltaR > 0.05) return 1;
-				}
-			}
-		}
-	}
-	return 0;
-};
-
-Bool_t aNTGCpreselector::phoIsDirectPromptDeltaR0p4(){
-	Int_t _nMC = _mcStatus.size();
-	for(Int_t i= 0; i < _nMC; i++){
-		if(((_mcPID[i]) == 22) && ((_mcStatus[i]) == 1) && ((std::abs((_mcMomPID[i])) <= 22) || (std::abs((_mcMomPID[i])) == 2212))){
-			for(Int_t j =0; j < _nMC; j++){
-				if((_mcPID[j]) == 21 || std::abs((_mcPID[j])) < 7){
-					Float_t _deltaR = deltaR(_mcEta[i], _mcPhi[i], _mcEta[j], _mcPhi[j]);
-					if(_deltaR > 0.4) return 1;
-				}
-			}
-		}
-	}
-	return 0;
 };
 
 aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_file){
@@ -758,7 +728,7 @@ void aNTGCpreselector::analyze(){
 		if(current_entry % REPORT_EVERY == 0){
 			std::cout<<"\t\t\t Analyzing entry "<<current_entry<<std::endl;
 		}
-		genWeight_ = isMC ? _genWeight : 1.;
+		genWeight_ = isMC ? (_genWeight) : 1.;
 		fillGlobalHists();
 		if(!selectBoostedJetGevent()) continue;
 		copyEvent();
@@ -792,8 +762,8 @@ Char_t aNTGCpreselector::isData(std::string _infilespath){
 	Char_t _isData_ = 0;
 	Char_t _isMC_ = 0;
 	for(auto _file : _filePaths){
-		if(matchRegex(_file, ".*_data.*\.root")) _isData_ = 1;
-		if(matchRegex(_file, ".*_mc.*\.root")) _isMC_ = 1;
+		if(matchRegex(_file, ".*data.*\.root")) _isData_ = 1;
+		if(matchRegex(_file, ".*mc.*\.root")) _isMC_ = 1;
 	}
 
 	if(_isData_ * _isMC_) {

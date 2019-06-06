@@ -1,4 +1,0 @@
-/hdfs/store/user/mwadud/aNTGC/ntupleListsTest/aNTGC_0p0005_0p0_0p0_0p0_300_1200.txt
-/hdfs/store/user/mwadud/aNTGC/ntupleListsTest/aNTGC_0p001_0p0_0p0_0p0_300_1200.txt
-/hdfs/store/user/mwadud/aNTGC/ntupleListsTest/aNTGC_0p002_0p0_0p0_0p0_300_1200.txt
-/hdfs/store/user/mwadud/aNTGC/ntupleListsTest/aNTGC_0p0_0p0_0p0_0p0_300_1200.txt
