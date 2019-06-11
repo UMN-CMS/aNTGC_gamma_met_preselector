@@ -4,10 +4,12 @@
 
 cmsswDir=/hdfs/store/user/mwadud/CMSSW_9_4_13/src/
 workDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/
+
 writeDir=$2
 jobsDir=$2
-
 jobList=$1
+
+dataPUfile="/hdfs/store/user/mwadud/aNTGCmet/pileup/Processed2017DataPileup.root"
 
 
 
@@ -19,9 +21,9 @@ splitfiles=50
 macroTemplate=${workDir}/macroTemplate.C
 runScriptTemplate=${workDir}/submit_job.sh
 condorCFGtemplate=${workDir}/condor_job.sh
-ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselectorBtaggingStudy.cc)
+ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMET.cc)
 ccfil2epath=$(readlink -e ${workDir}/../macros/extra_tools.cc)
-hfilepath=$(readlink -e ${workDir}/../macros/eventPreselectorBtaggingStudy.h)
+hfilepath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMET.h)
 
 ccfilename=$(basename "${ccfil1epath}")
 
@@ -42,14 +44,16 @@ echo 'Job list = '${jobList}''
 
 
 function preSelectDtaset(){
-	fileListPath=$1
-	jobName=$2
-	jobDir=$3
-	writeOutDir=$4
+	fileListPath=$(echo $1 | tr -d '\040\011\012\015')
+	jobName=$(echo $2 | tr -d '\040\011\012\015')
+	jobDir=$(echo $3 | tr -d '\040\011\012\015')
+	writeOutDir=$(echo $4 | tr -d '\040\011\012\015')
+	mcPUdist=$(echo $5 | tr -d '\040\011\012\015')
 
-	echo	-e		"\t\t Making jobs for " ${fileListPath}
+	echo	-e		"\t\t Creating job for " ${fileListPath}
 	echo 	-e		"\t\t Job name "${jobName}
 	echo 	-e		"\t\t Job directory "${jobDir}
+	echo 	-e		"\t\t Pileup file "${mcPUdist}
 	echo 	-e		"\t\t Ouput directory "${writeOutDir}
 
 	if [ ! -f ${fileListPath} ]; then
@@ -74,6 +78,8 @@ function preSelectDtaset(){
 	sed -i 's|#fileList|'${listFileName}'|g' ${rootMacro}
 	sed -i 's|#outfilepath|'${outFile}'|g' ${rootMacro}
 	sed -i 's|#ccfilepath|'${ccfilename}'|g' ${rootMacro}
+	sed -i 's|#mcPU|'${mcPUdist}'|g' ${rootMacro}
+	sed -i 's|#dataPU|'${dataPUfile}'|g' ${rootMacro}
 
 
 	### prepare run script ###
@@ -86,6 +92,10 @@ function preSelectDtaset(){
 	chmod +x ${runScript}
 
 
+	if [[ -z "${mcPUdist// }" ]]; then
+		fileListPath=${fileListPath}", "${mcPUdist}", "${dataPUfile}
+	fi
+
 	### prepare condor script ###
 	condorCFG=${jobDir}/condor_${jobName}.sh
 	cp ${condorCFGtemplate} ${condorCFG}
@@ -96,7 +106,7 @@ function preSelectDtaset(){
 	sed -i 's|#ccfile2|'${ccfil2epath}'|g' ${condorCFG}
 	sed -i 's|#hfile|'${hfilepath}'|g' ${condorCFG}
 	sed -i 's|#rootmacro|'${rootMacro}'|g' ${condorCFG}
-	sed -i 's|#filelist|'${fileListPath}'|g' ${condorCFG}
+	sed -i "s|#filelist|${fileListPath}|g" ${condorCFG}
 	sed -i 's|#outfile|'${outFile}'|g' ${condorCFG}
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
 	chmod +x ${condorCFG}
@@ -104,7 +114,6 @@ function preSelectDtaset(){
 	cd ${jobDir}
 	condor_submit ${condorCFG}
 	cd ${workDir}
-#	farmoutAnalysisJobs  --fwklite --infer-cmssw-path antgc  ${runScript}
 }
 
 mkdir -p ${writeDir}
@@ -112,15 +121,28 @@ cp ${ccfil1epath} ${writeDir}/${ccfilename}
 
 ccfil1epath=${writeDir}/${ccfilename}
 
-while IFS= read -r singleJobFileList
+[ ! -f $jobList ] && { echo "$jobList file not found"; exit 99; }
+
+while IFS=, read -r dataset xSec singleJobFileList mcPUfile
 do
-	echo -e "\n Preparing job from list file " ${singleJobFileList}
+
+	if [[ ! $singleJobFileList =~ "SinglePhoton" ]]
+	then
+		continue;
+	fi
+
+
+	echo -e "\n Preparing job:\n \t Dataset = "${dataset} "\n \t Ntuple List = "${singleJobFileList} "\n \t xSec = "${xSec} "\n \t mc pileup file = "${mcPUfile}
 
 	jobBaseName=$(basename "${singleJobFileList}")
 	jobBaseName="${jobBaseName%.*}"
 	jobBaseName=$(echo ${jobBaseName} | tr -cd [:alnum:])
 
+
 	jobDir=${jobsDir}/${jobBaseName}/
+
+	rm -rf ${jobDir}
+
 	if [ -d "${jobDir}" ]; then
 		echo -e "\t Error! Job directory already exists "${jobDir}
 		exit
@@ -137,8 +159,7 @@ do
 	### log directory ###
 	logDir=${jobDir}/log/
 
-
-	### make log and write directories ###
+	## make log and write directories ###
 	mkdir -p ${logDir}
 	mkdir -p ${writeOutDir}
 
@@ -149,15 +170,13 @@ do
 
 	for subJobList in $(find "${jobDir}" -name "${jobBaseName}_*");
 	do
-		echo -e "\n\n" ${subJobList}
-		jobName=$(basename "${subJobList}")
+		jobName=$(basename ${subJobList})
 		jobName="${jobName%.*}"
-		echo -e	"\t Submitting "${subJobList}
-		preSelectDtaset ${subJobList} ${jobName} ${jobDir} ${writeOutDir}
+		echo -e	"\t Submitting "${jobName}
+		preSelectDtaset ${subJobList} ${jobName} ${jobDir} ${writeOutDir} ${mcPUfile} ${dataPUfile}
 	done
 
 done <${jobList}
-
 
 
 echo "Submission complete!"

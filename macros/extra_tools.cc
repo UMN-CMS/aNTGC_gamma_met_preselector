@@ -195,6 +195,10 @@ struct TTreeReaderAnyValue{
 		val = nullptr;
 	};
 	void set(TTreeReader & ttreereader, std::string branchname){
+		if(!branchExists(branchname, ttreereader.GetTree())){
+			std::cout<<"\t\tError! Branch "<<branchname<<" does not exist in TTree "<<ttreereader.GetTree()->GetName()<<std::endl;
+			exit (EXIT_FAILURE);
+		}
 		val = new TTreeReaderValue<anytype>(ttreereader,branchname.c_str());
 		std::cout<<"\t\tInitialized branch <"<< boost::typeindex::type_id<anytype>().pretty_name() <<"> "<<branchname<<std::endl;
 	};
@@ -237,6 +241,10 @@ struct TTreeReaderArrayValue{
 		val = nullptr;
 	};
 	void set(TTreeReader & ttreereader, std::string branchname){
+		if(!branchExists(branchname, ttreereader.GetTree())){
+			std::cout<<"\t\tError! Branch "<<branchname<<" does not exist in TTree "<<ttreereader.GetTree()->GetName()<<std::endl;
+			exit (EXIT_FAILURE);
+		}
 		val = new TTreeReaderArray<anytype>(ttreereader,branchname.c_str());
 		std::cout<<"\t\tInitialized array branch <"<< boost::typeindex::type_id<anytype>().pretty_name() <<"> "<<branchname<<std::endl;
 	};
@@ -654,8 +662,10 @@ public:
 		weights_ = (TH1F*) getHistFromFile(dataHistName, dataFile);
 		MC_distr_ = (TH1F*) getHistFromFile(mcHistName, mcFile);
 
-		weights_->Scale( 100.0/ weights_->Integral() );
-		MC_distr_->Scale( 100.0/ MC_distr_->Integral() );
+		int NBins = weights_->GetNbinsX();
+
+		weights_->Scale( 1000000.0/ weights_->Integral(0, NBins+1));
+		MC_distr_->Scale( 1000000.0/ MC_distr_->Integral(0, NBins+1));
 
 		weights_->SetName("pileupWeights");
 		weights_->Divide(MC_distr_);
@@ -665,15 +675,13 @@ public:
 
 		std::cout << "\t\tPileup weights: " << std::endl;
 
-		int NBins = weights_->GetNbinsX();
-
 		for(int ibin = 1; ibin<NBins+1; ++ibin){
 			std::cout << "\t\t\t" << ibin-1 << "\t" << weights_->GetBinContent(ibin) << std::endl;
 		}
 	};
 
 	Double_t weight( Float_t n_int ){
-		Int_t bin = weights_->GetXaxis()->FindBin(n_int + 0.1);
+		Int_t bin = weights_->GetXaxis()->FindBin(n_int);
 		return weights_->GetBinContent(bin);
 	}
 
@@ -1678,7 +1686,6 @@ Double_t weightedYspread(TH1 *_hist){
 Bool_t branchExists(std::string _branchName, TTree *_tree){
 	TBranch* br = (TBranch*) _tree->GetListOfBranches()->FindObject(_branchName.c_str());
 	if(br){
-		delete br;
 		return 1;
 	} else{
 		return 0;

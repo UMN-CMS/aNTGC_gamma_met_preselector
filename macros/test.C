@@ -1,8 +1,8 @@
 #include "eventPreselectorGammaMET.cc"
 
-std::string dataPU = "/scratch/mwadud/anTGCpreselector/macros/dataPUhist.root";
-std::string mcPU = "/hdfs/store/user/mwadud/aNTGCmet/pileup/aNTGC_0p0003_0p0000004_0p_0p_200_500.root";
-std::string mcNtuples = "/hdfs/store/user/mwadud/aNTGCmet/ntupleLists/aNTGC_0p0003_0p0000004_0p_0p_200_500.txt";
+std::string dataPU = "/hdfs/store/user/mwadud/aNTGCmet/pileup/Processed2017DataPileup.root";
+std::string mcPU = "/hdfs/store/user/mwadud/aNTGCmet/pileup/ZNuNuGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph.root";
+std::string mcNtuples = "/hdfs/store/user/mwadud/aNTGCmet/ntupleLists/ZNuNuGJets_MonoPhoton_PtG-130_TuneCUETP8M1_13TeV-madgraph.txt";
 void test(){
-	aNTGCpreselector t(mcNtuples, "test_out.root", mcPU, dataPU);
+	aNTGCpreselector t("SinglePhotonRun2017B17Nov2017v1MINIAOD_000", "test_out.root", "", "");
 };

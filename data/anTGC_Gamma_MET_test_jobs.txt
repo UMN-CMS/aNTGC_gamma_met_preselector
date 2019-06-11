@@ -1,0 +1,2 @@
+/SinglePhoton/Run2017B-17Nov2017-v1/MINIAOD,-1,/hdfs/store/user/mwadud/aNTGCmet/ntupleLists/SinglePhotonRun2017B17Nov2017v1MINIAOD.txt,
+/aNTGC_0p_0p_0p_0p_500_1200/mwadud-aNTGC_0p_0p_0p_0p_500_1200_MINIAODSIM-8b3f0a6dce9f2bd2c845840a26003c60/USER,0.0008,/hdfs/store/user/mwadud/aNTGCmet/ntupleLists/aNTGC_0p_0p_0p_0p_500_1200.txt,/hdfs/store/user/mwadud/aNTGCmet/pileup/aNTGC_0p_0p_0p_0p_500_1200.root

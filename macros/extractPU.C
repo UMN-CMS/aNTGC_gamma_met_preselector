@@ -1,11 +1,11 @@
 #include "extra_tools.cc"
 
-std::string INFILES="";
-std::string OUTFILE="";
+std::string INFILES="/scratch/mwadud/anTGCpreselector/data/anTGC_met_ntuple_lists.txt";
+std::string OUTDIR="../pileup/";
 std::string HISTNAME="ggNtuplizer/hPUTrue";
 
 
-void extractPU(std::string _inFileList=INFILES, std::string _outFile=OUTFILE, std::string _histName = HISTNAME);
+void extractPU(std::string _inFileList, std::string _outFile, std::string _histName = HISTNAME);
 void batchExtractPU(std::string _inLists, std::string _outDir, std::string _histName = HISTNAME);
 
 
@@ -45,7 +45,7 @@ void extractPU(std::string _inFileList, std::string _outFile, std::string _histN
 
 
 
-void batchExtractPU(std::string _inLists, std::string _outDir, std::string _histName){
+void batchExtractPU(std::string _inLists=INFILES, std::string _outDir=OUTDIR, std::string _histName){
 
 	std::vector<std::string> ntupleLists = getLinesRegex(_inLists, "^((?!SinglePhoton).)*$");
 

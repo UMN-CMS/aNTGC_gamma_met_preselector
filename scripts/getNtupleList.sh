@@ -8,7 +8,8 @@ function listNtuples(){
 	WriteDir=$2
 	outfile=${SearchPath/'crab_'/''}
 	outfile=${WriteDir}/${outfile##*/}.txt
-
+	
+	rm -f ${outfile}
 	find ${SearchPath} -name "*.root" -not -path '*/failed/*' -type f | tee ${outfile}
 }
 

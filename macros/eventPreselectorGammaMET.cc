@@ -1,5 +1,5 @@
-#ifndef ANTGC_PRESELECTOR_CC
-#define ANTGC_PRESELECTOR_CC
+#ifndef ANTGC_Gamma_MET_PRESELECTOR_CC
+#define ANTGC_Gamma_MET_PRESELECTOR_CC
 
 #include "eventPreselectorGammaMET.h"
 #include "TSystem.h"
@@ -16,7 +16,7 @@ aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_f
 	"IsMC: "<<isMC<<std::endl;
 
 	if(file_exists(_file_list)) inputTree =openTChain(_file_list, "ggNtuplizer/EventTree");
-	else if(isDirectory(_file_list)) inputTree = openTChainWithFilesInDir(_file_list, "ggNtuplizer/EventTree");
+	// else if(isDirectory(_file_list)) inputTree = openTChainWithFilesInDir(_file_list, "ggNtuplizer/EventTree");
 	else {
 		std::cout<<"Error! Cannot read given input path/list ("<<_file_list<<")"<<std::endl;
 		return;
@@ -45,8 +45,6 @@ aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_f
 
 	if(isMC) initPileupReweighter(_mcPUfile, _dataPUfile);
 
-	gSystem->cd(0);
-
 	initIntputNtuples();
 
 	setGlobalHists();
@@ -63,7 +61,8 @@ aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_f
 
 	closeTChain(inputTree);
 
-	std::cout<<"Complete!"<<std::endl<<
+	std::cout<<"\tOutput written to file\t"<<_output_file <<std::endl<<
+	"Complete!"<<std::endl<<
 	getCurrentTime()<<std::endl;
 };
 
@@ -77,9 +76,10 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 	_lumis.set(inputTTreeReader, "lumis");
 	_isPVGood.set(inputTTreeReader, "isPVGood");
 	_HLTPho.set(inputTTreeReader, "HLTPho");
-
+	_nVtx.set(inputTTreeReader, "nVtx");
 	if(isMC){
 		_genWeight.set(inputTTreeReader, "genWeight");
+		_puTrue.set(inputTTreeReader, "puTrue");
 		_mcHasDirectPromptPho.set(inputTTreeReader, "mcHasDirectPromptPho");
 		_mcStatus.set(inputTTreeReader, "mcStatus");
 		_mcEta.set(inputTTreeReader, "mcEta");
@@ -146,13 +146,19 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 
 
 void aNTGCpreselector::setGlobalHists(){
-	gSystem->cd(0);
 	h_genWeightSum.SetDirectory(outFile->GetDirectory(""));
 	h_genWeightSignSum.SetDirectory(outFile->GetDirectory(""));
 	h_eventWeightSum.SetDirectory(outFile->GetDirectory(""));
 	h_cutFlowEvts.SetDirectory(outFile->GetDirectory(""));
 	h_cutFlowWeighted.SetDirectory(outFile->GetDirectory(""));
 	h_cutFlowWeightSigns.SetDirectory(outFile->GetDirectory(""));
+	h_nVtxPrereweight.SetDirectory(outFile->GetDirectory(""));
+
+	if(isMC){
+		h_pileupPrereweight.SetDirectory(outFile->GetDirectory(""));
+		h_pileupReweighted.SetDirectory(outFile->GetDirectory(""));
+		h_nVtxReweighted.SetDirectory(outFile->GetDirectory(""));
+	}
 };
 
 
@@ -175,9 +181,14 @@ void aNTGCpreselector::setGammaMEThists(){
 			hist1d.initializehist();
 			hist1d.hist->SetDirectory(outFile->GetDirectory(""));
 		}
-	}
 
-	gSystem->cd(0);
+
+		std::cout<<"Initializing gen TH2D for Gamma + MET channel..."<<std::endl;
+		for(auto & hist2d : GammaMET_2d_gen_Histograms){
+			hist2d.initializehist();
+			hist2d.hist->SetDirectory(outFile->GetDirectory(""));
+		}
+	}
 
 	std::cout<<"\tBoosted Gamma + MET histograms initialized!"<<std::endl;
 };
@@ -195,6 +206,7 @@ void aNTGCpreselector::setOutputTree(){
 
 	if(isMC){
 		outTree->Branch("genWeight", &genWeight_);
+		outTree->Branch("puWeight", &puWeight_);
 		outTree->Branch("eventWeight", &eventWeight_);
 		outTree->Branch("puTrue", &puTrue_);
 		outTree->Branch("mcHasDirectPromptPho", &mcHasDirectPromptPho_);
@@ -232,8 +244,6 @@ void aNTGCpreselector::setOutputTree(){
 	}
 
 	std::cout<<"\t\t Output tree initialized!"<<std::endl;
-
-	gSystem->cd(0);
 };
 
 
@@ -278,6 +288,8 @@ void aNTGCpreselector::copyEvent(){
 
 		genMET_ = _genMET;
 		genMETPhi_ = _genMETPhi;
+
+		p_RECOoverGEN_MET = pfMET_/genMET_;
 	}
 };
 
@@ -286,6 +298,12 @@ void aNTGCpreselector::fillGlobalHists(){
 	h_genWeightSum.Fill(0.5, genWeight_);
 	h_genWeightSignSum.Fill(0.5, genWeight_/std::abs(genWeight_));
 	h_eventWeightSum.Fill(0.5, eventWeight_);
+	h_nVtxPrereweight.Fill(p_nVtx);
+	if(isMC){
+		h_pileupPrereweight.Fill((Float_t)(puTrue_)+0.01);
+		h_pileupReweighted.Fill((Float_t)(puTrue_)+0.01, puWeight_);
+		h_nVtxReweighted.Fill(p_nVtx + 0.01, puWeight_);
+	}
 };
 
 
@@ -302,7 +320,13 @@ void aNTGCpreselector::fillGammaMEThists(){
 		for(auto & hist1D : GammaMET_1d_gen_histograms){
 			hist1D.fill(eventWeight_);
 		}
+
+		for(auto & hist2D : GammaMET_2d_gen_Histograms){
+			hist2D.fill(eventWeight_);
+		}
 	}
+
+
 };
 
 
@@ -333,7 +357,7 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	// 200GeV photon trigger
 
 	ULong64_t tmp_HLTPho = (_HLTPho);
-	if(!getBit(tmp_HLTPho, 9)) return 0;// 9 = 200GeV, 11 = 300GeV
+	if(!getBit(tmp_HLTPho, 19)) return 0;// 9 = HLT_Photon200_v, 11 = HLT_Photon300_NoHE_v, 19 = HLT_Photon135_PFMET100_v
 
 	registerCutFlow();
 
@@ -478,6 +502,7 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 		jetCounter++;
 
 	}
+
 	if(jetCounter > 1) return 0;
 	registerCutFlow();
 
@@ -496,18 +521,22 @@ void aNTGCpreselector::analyze(){
 		ULong64_t current_entry = inputTTreeReader.GetCurrentEntry();
 
 		if(current_entry % REPORT_EVERY == 0){
-			std::cout<<"\t"<< getCurrentTime()<<"\tAnalyzing entry\t"<<current_entry<<std::endl;
+			std::cout<<"\t"<< getCurrentTime()<<"\t\t\tAnalyzing entry\t"<<current_entry<<std::endl;
 		}
 
 		if(isMC){
 
 			genWeight_ = _genWeight;
 
-			// eventWeight_ = (_genWeight) * puReWeighter.weight((_puTrue));
-			// eventWeight_ = (_genWeight) * puReWeighter.weight((_puTrue));
-			eventWeight_ = (_genWeight);
+			puTrue_ = _puTrue;
 
+			puWeight_ = puReWeighter.weight((Float_t)(puTrue_) + 0.01);
+
+			eventWeight_ = (_genWeight) * puWeight_;
+			// eventWeight_ = (_genWeight);
 		}
+
+		p_nVtx = (Float_t) _nVtx;
 
 
 		fillGlobalHists();
@@ -566,7 +595,7 @@ Char_t aNTGCpreselector::isData(std::string _infilespath){
 void aNTGCpreselector::initPileupReweighter(std::string _mcPUfile, std::string _dataPUfile){
 	std::cout<<"\t\tPileup reweighting to be done with data pileup profile "<<_dataPUfile<<std::endl<<
 	"\t\t\t and MC pileup profile "<<_mcPUfile<<std::endl;
-	// puReWeighter.init(_mcPUfile, _dataPUfile, "hPUTrue", "pileup");
+	puReWeighter.init(_mcPUfile, _dataPUfile, "hPUTrue", "pileup");
 };
 
 #endif

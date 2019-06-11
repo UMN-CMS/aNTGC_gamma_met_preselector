@@ -1,5 +1,5 @@
-#ifndef ANTGC_PRESELECTOR_H
-#define ANTGC_PRESELECTOR_H
+#ifndef ANTGC_Gamma_MET_PRESELECTOR_H
+#define ANTGC_Gamma_MET_PRESELECTOR_H
 
 #include "extra_tools.cc"
 
@@ -11,7 +11,7 @@
 
 #define ZMASS 91.1876
 
-#define REPORT_EVERY 1000
+#define REPORT_EVERY 10000
 
 Double_t ECAL_ETA_BINS[28] = {-2.5, -2.3, -2.1, -1.9, -1.7, -BETRetaMax, -BETRetaMin, -1.3, -1.1, -0.9, -0.7, -0.5, -0.3, -0.1,  0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, BETRetaMin, BETRetaMax, 1.7, 1.9, 2.1, 2.3, 2.5};
 
@@ -37,11 +37,6 @@ private:
 
 	PileupReWeighting puReWeighter;
 
-	Float_t lastCutStep = 0.5;
-	TH1F h_cutFlowEvts{"cutFlowEvts", "Cut Flow (# of events)", 20, 0., 20.};
-	TH1F h_cutFlowWeighted{"cutFlow", "Cut Flow", 20, 0., 20.};
-	TH1F h_cutFlowWeightSigns{"cutFlowWgtSigns", "Cut Flow (weight signs)", 20, 0., 20.};
-
 	Bool_t isQCD;
 	Bool_t isGJets;
 	Bool_t isMC;
@@ -56,7 +51,9 @@ private:
 	TTreeReaderAnyValue<Long64_t> 			_event;
 	TTreeReaderAnyValue<Int_t> 				_lumis;
 
-	TTreeReaderAnyValue<Int_t>				_puTrue;
+	TTreeReaderAnyValue<UChar_t>			_puTrue;
+
+	TTreeReaderAnyValue<UChar_t>			_nVtx;
 
 	TTreeReaderAnyValue<Bool_t> 			_isPVGood;
 
@@ -64,7 +61,7 @@ private:
 
 	TTreeReaderAnyValue<Float_t>			_genWeight;
 	TTreeReaderAnyValue<Char_t> 			_mcHasDirectPromptPho;
-	TTreeReaderVectorValue<Short_t> 			_mcStatus;
+	TTreeReaderVectorValue<Short_t> 		_mcStatus;
 	TTreeReaderVectorValue<Int_t> 			_mcPID;
 	TTreeReaderVectorValue<Float_t> 		_mcEta;
 	TTreeReaderVectorValue<Float_t> 		_mcPhi;
@@ -127,7 +124,7 @@ private:
 
 	// Running vars
 	Short_t selectedPhotonIndex = -999;
-	Float_t puWeight;
+
 
 
 	/***********************************************output TTree branches***********************************/
@@ -142,6 +139,7 @@ private:
 	ULong64_t 					HLTPho_;
 	Float_t 					genWeight_;
 	Float_t						eventWeight_ = 1.;
+	Float_t 					puWeight_;
 	Char_t 						mcHasDirectPromptPho_;
 
 	Float_t 					phoEta_;
@@ -177,23 +175,39 @@ private:
 	TH1F h_genWeightSum{"sumGenWeights", "Sum of Gen Weights", 1, 0., 1};
 	TH1F h_genWeightSignSum{"sumGenWeightSigns", "Sum of Gen Weight Signs", 1, 0., 1};
 	TH1F h_eventWeightSum{"sumEventWeights", "Sum of Event Weights", 1, 0., 1};
+	TH1F h_pileupPrereweight{"pileupPrereweight", "Pileup before reweighting", 1000, 0., 1000.};
+	TH1F h_pileupReweighted{"pileupReweighted", "Pileup after reweighting", 1000, 0., 1000.};
+	TH1F h_nVtxPrereweight{"nVtxPrereweight", "# of vertices before reweighting", 1000, 0., 1000.};
+	TH1F h_nVtxReweighted{"nVtxReweighted", "# of vertices after reweighting", 1000, 0., 1000.};
 
+	Float_t lastCutStep = 0.5;
+	TH1F h_cutFlowEvts{"cutFlowEvts", "Cut Flow (# of events)", 20, 0., 20.};
+	TH1F h_cutFlowWeighted{"cutFlow", "Cut Flow", 20, 0., 20.};
+	TH1F h_cutFlowWeightSigns{"cutFlowWgtSigns", "Cut Flow (weight signs)", 20, 0., 20.};
 
 	/***********************************************BoostedJet+G histograms***********************************/
-	plot_variable 	 	var_phoCalibEt{phoCalibEt_, 200., 1500., 130, "p_{T}(\\gamma)", "GeV"},
+
+	Float_t p_RECOoverGEN_MET;
+	Float_t p_nVtx;
+
+	plot_variable 	 	var_phoCalibEt{phoCalibEt_, 0., 1500., 300, "p_{T}(\\gamma)", "GeV"},
 						var_phoEta{phoEta_, ECAL_ETA_BINS, 27, "\\eta(\\gamma)"},
 						var_phoPhi{phoPhi_, -3.15, 3.15, 63, "\\phi(\\gamma)"},
-						var_phoSigmaIEtaIEtaFull5x5{phoSigmaIEtaIEtaFull5x5_, 0., 0.1, 1000, "#sigma_{i#etai#eta}", ""},
-						var_phoGenPt_{genPhoPt_, 200., 1500., 130, "p_{T}(gen\\ \\gamma)", "GeV"},
+						var_phoSigmaIEtaIEtaFull5x5{phoSigmaIEtaIEtaFull5x5_, 0., 0.1, 1000, "#sigma_{i#eta i#eta}", ""},
+						var_phoSigmaIEtaIPhiFull5x5{phoSigmaIEtaIPhiFull5x5_, -0.001, 0.001, 2000, "#sigma_{i#eta i#phi}", ""},
+						var_phoSigmaIPhiIPhiFull5x5{phoSigmaIPhiIPhiFull5x5_, 0., 0.1, 1000, "#sigma_{i#phi i#phi}", ""},
+						var_phoGenPt_{genPhoPt_, 0., 1500., 300, "p_{T}(gen\\ \\gamma)", "GeV"},
 						var_phoGenEta_{genPhoEta_,  ECAL_ETA_BINS, 27, "\\eta(gen\\ \\gamma)"},
 						var_phoGenPhi_{genPhoPhi_, -3.15, 3.15, 63, "\\phi(gen\\ \\gamma)"},
-						var_genMET{genMET_, 0., 2000., 2000, "gen #slash{E}_{T}", "GeV"},
+						var_genMET{genMET_, 0., 2000., 400, "gen #slash{E}_{T}", "GeV"},
 						var_genMETPhi{genMETPhi_, -3.15, 3.15, 63, "#phi(gen #slash{E}_{T})", ""},
-						var_pfMET{pfMET_, 0., 2000., 1000, "#slash{E}_{T}", "GeV"},
+						var_pfMET{pfMET_, 0., 2000., 400, "#slash{E}_{T}", "GeV"},
 						var_pfMETPhi_{pfMETPhi_, -3.15, 3.15, 63, "#phi(#slash{E}_{T})", ""},
 						var_deltaPhiphoMET_{deltaPhi_phoMET_, 0, 6.3, 63, "#Delta #phi (#gamma, #slash{E}_{T})", ""},
 						var_deltaPhi_gen_phoMET{deltaPhi_gen_phoMET_, 0, 6.3, 63, "#Delta #phi (gen #gamma, gen #slash{E}_{T})", ""},
-						var_pfMET_metSig{pfMET_metSig_, 0., 5000., 500, "#slash{E}_{T} Significance", ""};
+						var_pfMET_metSig{pfMET_metSig_, 0., 1500., 1500, "#slash{E}_{T} Significance", ""},
+						var_pfMET_EtSig{pfMET_EtSig_, 0., 100., 100, "#slash{E}_{T}/#sqrt{#sum |E_{T}|}"},
+						var_p_RECOoverGEN_MET{p_RECOoverGEN_MET, 0., 10., 1000, "#slash{E}_{T}^{RECO}/#slash{E}_{T}^{GEN}", ""};
 
 
 
@@ -205,7 +219,22 @@ private:
 		{var_pfMETPhi_},
 		{var_deltaPhiphoMET_},
 		{var_phoSigmaIEtaIEtaFull5x5},
-		{var_pfMET_metSig}
+		{var_phoSigmaIEtaIPhiFull5x5},
+		{var_phoSigmaIPhiIPhiFull5x5},
+		{var_pfMET_metSig},
+		{var_pfMET_EtSig}
+	};
+
+
+	std::vector<twoDhistogram_template> GammaMET_2d_Histograms ={
+		{var_phoCalibEt, var_deltaPhiphoMET_},
+		{var_phoEta, var_phoSigmaIEtaIEtaFull5x5},
+		{var_phoEta, var_phoSigmaIEtaIPhiFull5x5},
+		{var_phoEta, var_phoSigmaIPhiIPhiFull5x5}
+	};
+
+	std::vector<twoDhistogram_template> GammaMET_2d_gen_Histograms ={
+		{var_phoGenPt_, var_deltaPhi_gen_phoMET}
 	};
 
 	std::vector<histogram_template> GammaMET_1d_gen_histograms ={
@@ -214,13 +243,8 @@ private:
 		{var_phoGenPhi_},
 		{var_genMET},
 		{var_genMETPhi},
+		{var_p_RECOoverGEN_MET},
 		{var_deltaPhi_gen_phoMET}
-	};
-
-
-	std::vector<twoDhistogram_template> GammaMET_2d_Histograms ={
-		{var_phoCalibEt, var_pfMETPhi_},
-		{var_phoEta, var_phoSigmaIEtaIEtaFull5x5}
 	};
 };
 
