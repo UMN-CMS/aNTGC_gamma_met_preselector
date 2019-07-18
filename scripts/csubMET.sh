@@ -17,13 +17,17 @@ dataPUfile="/hdfs/store/user/mwadud/aNTGCmet/pileup/Processed2017DataPileup.root
 
 ############################################################################
 jobflavor=tomorrow
-splitfiles=50
+splitfiles=60
 macroTemplate=${workDir}/macroTemplate.C
 runScriptTemplate=${workDir}/submit_job.sh
 condorCFGtemplate=${workDir}/condor_job.sh
-ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMET.cc)
 ccfil2epath=$(readlink -e ${workDir}/../macros/extra_tools.cc)
-hfilepath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMET.h)
+ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMETv2Data.cc)
+# ccfil1epath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMET.cc)
+hfilepath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMETv2Data.h)
+# hfilepath=$(readlink -e ${workDir}/../macros/eventPreselectorGammaMET.h)
+# cmsswfile=${workDir}/cmsset_default.sh
+cmsswfile="/cvmfs/cms.cern.ch/cmsset_default.sh"
 
 ccfilename=$(basename "${ccfil1epath}")
 
@@ -48,13 +52,15 @@ function preSelectDtaset(){
 	jobName=$(echo $2 | tr -d '\040\011\012\015')
 	jobDir=$(echo $3 | tr -d '\040\011\012\015')
 	writeOutDir=$(echo $4 | tr -d '\040\011\012\015')
-	mcPUdist=$(echo $5 | tr -d '\040\011\012\015')
+	xSec=$(echo $5 | tr -d '\040\011\012\015')
+	mcPUdist=$(echo $6 | tr -d '\040\011\012\015')
 
 	echo	-e		"\t\t Creating job for " ${fileListPath}
 	echo 	-e		"\t\t Job name "${jobName}
 	echo 	-e		"\t\t Job directory "${jobDir}
 	echo 	-e		"\t\t Pileup file "${mcPUdist}
 	echo 	-e		"\t\t Ouput directory "${writeOutDir}
+	echo 	-e		"\t\t Cross section "${xSec}
 
 	if [ ! -f ${fileListPath} ]; then
 		echo "Error! File not found! Offending file: " ${fileListPath}
@@ -80,6 +86,7 @@ function preSelectDtaset(){
 	sed -i 's|#ccfilepath|'${ccfilename}'|g' ${rootMacro}
 	sed -i 's|#mcPU|'${mcPUdist}'|g' ${rootMacro}
 	sed -i 's|#dataPU|'${dataPUfile}'|g' ${rootMacro}
+	sed -i 's|#xSec|'${xSec}'|g' ${rootMacro}
 
 
 	### prepare run script ###
@@ -87,6 +94,7 @@ function preSelectDtaset(){
 	cp ${runScriptTemplate} ${runScript}
 	sed -i 's|#cmsswdir|'${cmsswDir}'|g' ${runScript}
 	sed -i 's|#macrofile|'${jobName}.C'|g' ${runScript}
+	sed -i 's|#cmssetsh|'${cmsswfile}'|g' ${runScript}
 
 
 	chmod +x ${runScript}
@@ -109,9 +117,18 @@ function preSelectDtaset(){
 	sed -i "s|#filelist|${fileListPath}|g" ${condorCFG}
 	sed -i 's|#outfile|'${outFile}'|g' ${condorCFG}
 	sed -i 's|#jobflavour|'${jobflavor}'|g' ${condorCFG}
+	sed -i 's|#cmsswfile|'${cmsswfile}'|g' ${condorCFG}
+	
 	chmod +x ${condorCFG}
 
+
+	cp ${ccfil1epath} ${jobDir}/eventPreselectorGammaMET.cc
+	cp ${ccfil2epath} ${jobDir}/extra_tools.cc
+	cp ${hfilepath} ${jobDir}/eventPreselectorGammaMET.h
+
+	
 	cd ${jobDir}
+	#bash ${runScript}
 	condor_submit ${condorCFG}
 	cd ${workDir}
 }
@@ -126,11 +143,15 @@ ccfil1epath=${writeDir}/${ccfilename}
 while IFS=, read -r dataset xSec singleJobFileList mcPUfile
 do
 
-	if [[ ! $singleJobFileList =~ "SinglePhoton" ]]
-	then
-		continue;
-	fi
+	# if [[ $singleJobFileList =~ "SinglePhoton" ]]
+	# then
+	# 	continue;
+	# fi
 
+	# if [[ $singleJobFileList =~ "Run2017F" ]]
+	# then
+	# 	continue;
+	# fi
 
 	echo -e "\n Preparing job:\n \t Dataset = "${dataset} "\n \t Ntuple List = "${singleJobFileList} "\n \t xSec = "${xSec} "\n \t mc pileup file = "${mcPUfile}
 
@@ -141,13 +162,15 @@ do
 
 	jobDir=${jobsDir}/${jobBaseName}/
 
-	rm -rf ${jobDir}
+
 
 	if [ -d "${jobDir}" ]; then
+		# rm -rf ${jobDir}
 		echo -e "\t Error! Job directory already exists "${jobDir}
 		exit
 	fi
 
+	mkdir -p ${jobDir}
 
 	writeOutDir=${writeDir}/${jobBaseName}/out/
 	if [ -d "${writeOutDir}" ]; then
@@ -173,7 +196,7 @@ do
 		jobName=$(basename ${subJobList})
 		jobName="${jobName%.*}"
 		echo -e	"\t Submitting "${jobName}
-		preSelectDtaset ${subJobList} ${jobName} ${jobDir} ${writeOutDir} ${mcPUfile} ${dataPUfile}
+		preSelectDtaset ${subJobList} ${jobName} ${jobDir} ${writeOutDir} ${xSec} ${mcPUfile}
 	done
 
 done <${jobList}

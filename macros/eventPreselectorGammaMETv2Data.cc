@@ -1,7 +1,7 @@
 #ifndef ANTGC_Gamma_MET_PRESELECTOR_CC
 #define ANTGC_Gamma_MET_PRESELECTOR_CC
 
-#include "eventPreselectorGammaMET.h"
+#include "eventPreselectorGammaMETv2Data.h"
 #include "TSystem.h"
 
 aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_file, std::string _mcPUfile, std::string _dataPUfile, Float_t _xSec=-1.){
@@ -71,13 +71,14 @@ aNTGCpreselector::aNTGCpreselector(std::string _file_list, std::string _output_f
 
 Char_t aNTGCpreselector::initIntputNtuples(){
 	std::cout<<"*******************************************************************************"<<std::endl<<
-	"Initializing branches in input ntuples... "<<std::endl;
+	"Initializing branches in input ntuples..."<<std::endl;
 
 	_run.set(inputTTreeReader, "run");
 	_event.set(inputTTreeReader, "event");
 	_lumis.set(inputTTreeReader, "lumis");
 	_isPVGood.set(inputTTreeReader, "isPVGood");
 	_HLTPho.set(inputTTreeReader, "HLTPho");
+	_beamHaloSummary.set(inputTTreeReader, "beamHaloSummary");
 	_nVtx.set(inputTTreeReader, "nVtx");
 	if(isMC){
 		_genWeight.set(inputTTreeReader, "genWeight");
@@ -101,8 +102,7 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 	_phoCalibE.set(inputTTreeReader, "phoCalibE");
 	_phoSigmaCalibE.set(inputTTreeReader, "phoSigmaCalibE");
 	_phoCalibEt.set(inputTTreeReader, "phoCalibEt");
-	_phohasPixelSeed.set(inputTTreeReader, "phohasPixelSeed");
-	_phoEleVeto.set(inputTTreeReader, "phoEleVeto");
+	_phoQualityBits.set(inputTTreeReader, "phoQualityBits");
 	_phoR9.set(inputTTreeReader, "phoR9");
 	_phoR9Full5x5.set(inputTTreeReader, "phoR9Full5x5");
 	_phoSigmaIEtaIEtaFull5x5.set(inputTTreeReader, "phoSigmaIEtaIEtaFull5x5");
@@ -111,6 +111,31 @@ Char_t aNTGCpreselector::initIntputNtuples(){
 	_phoIDMVA.set(inputTTreeReader, "phoIDMVA");
 	_phoIDbit.set(inputTTreeReader, "phoIDbit");
 	_phoSeedTime.set(inputTTreeReader, "phoSeedTime");
+	_phoSeedEnergy.set(inputTTreeReader, "phoSeedEnergy");
+	_phoMIPChi2.set(inputTTreeReader, "phoMIPChi2");
+	_phoMIPTotEnergy.set(inputTTreeReader, "phoMIPTotEnergy");
+	_phoMIPSlope.set(inputTTreeReader, "phoMIPSlope");
+	_phoMIPIntercept.set(inputTTreeReader, "phoMIPIntercept");
+	_phoMIPNhitCone.set(inputTTreeReader, "phoMIPNhitCone");
+	_phoSCindex.set(inputTTreeReader, "phoSCindex");
+
+	_ecalSCindex.set(inputTTreeReader, "ecalSCindex");
+	_ecalSCeta.set(inputTTreeReader, "ecalSCeta");
+	_ecalSCphi.set(inputTTreeReader, "ecalSCphi");
+	_ecalSCEn.set(inputTTreeReader, "ecalSCEn");
+	_ecalSCRawEn.set(inputTTreeReader, "ecalSCRawEn");
+	_ecalSCetaWidth.set(inputTTreeReader, "ecalSCetaWidth");
+	_ecalSCphiWidth.set(inputTTreeReader, "ecalSCphiWidth");
+	_ecalSC_LICTD.set(inputTTreeReader, "ecalSC_LICTD");
+	_ecalSC_maxEnXtalTime.set(inputTTreeReader, "ecalSC_maxEnXtalTime");
+	_ecalSC_maxEnXtalSwissCross.set(inputTTreeReader, "ecalSC_maxEnXtalSwissCross");
+	_ecalSC_maxEnXtalBits.set(inputTTreeReader, "ecalSC_maxEnXtalSwissCross");
+	_ecalSC_nL1Spike.set(inputTTreeReader, "ecalSC_nL1Spike");
+	_ecalSC_nDiweird.set(inputTTreeReader, "ecalSC_nDiweird");
+	_ecalSC_nWeird.set(inputTTreeReader, "ecalSC_nWeird");
+	_ecalSC_nSaturated.set(inputTTreeReader, "ecalSC_nSaturated");
+	_ecalSC_nOutOfTime.set(inputTTreeReader, "ecalSC_nOutOfTime");
+	_ecalSC_nXtals.set(inputTTreeReader, "ecalSC_nXtals");
 
 	_metFilters.set(inputTTreeReader, "metFilters");
 	_pfMET.set(inputTTreeReader, "pfMET");
@@ -226,6 +251,17 @@ void aNTGCpreselector::setOutputTree(){
 	outTree->Branch("phoSigmaIEtaIPhiFull5x5", &phoSigmaIEtaIPhiFull5x5_);
 	outTree->Branch("phoSigmaIPhiIPhiFull5x5", &phoSigmaIPhiIPhiFull5x5_);
 
+	outTree->Branch("phoSeedTime", &phoSeedTime_);
+	outTree->Branch("phoSeedEnergy", &phoSeedEnergy_);
+	outTree->Branch("phoMIPChi2", &phoMIPChi2_);
+	outTree->Branch("phoMIPTotEnergy", &phoMIPTotEnergy_);
+	outTree->Branch("phoMIPSlope", &phoMIPSlope_);
+	outTree->Branch("phoMIPIntercept", &phoMIPIntercept_);
+	outTree->Branch("phoMIPNhitCone", &phoMIPNhitCone_);
+	outTree->Branch("phoSCLICTD", &phoSCLICTD_);
+	outTree->Branch("phoSCmaxEnXtalTime", &phoSCmaxEnXtalTime_);
+	outTree->Branch("phoSCmaxEnXtalSwissCross", &phoSCmaxEnXtalSwissCross_);
+
 	if(isMC){
 		outTree->Branch("genPhoPt", &genPhoPt_);
 		outTree->Branch("genPhoEta", &genPhoEta_);
@@ -252,9 +288,9 @@ void aNTGCpreselector::setOutputTree(){
 
 void aNTGCpreselector::copyEvent(){
 
-	run_ = _run;
-	event_ = _event;
-	HLTPho_ = _HLTPho;
+	run_ = (_run);
+	event_ = (_event);
+	HLTPho_ = (_HLTPho);
 
 	phoEta_ = _phoEta[selectedPhotonIndex];
 	phoPhi_ = _phoPhi[selectedPhotonIndex];
@@ -266,6 +302,25 @@ void aNTGCpreselector::copyEvent(){
 	phoSigmaIEtaIEtaFull5x5_ = _phoSigmaIEtaIEtaFull5x5[selectedPhotonIndex];
 	phoSigmaIEtaIPhiFull5x5_ = _phoSigmaIEtaIPhiFull5x5[selectedPhotonIndex];
 	phoSigmaIPhiIPhiFull5x5_ = _phoSigmaIPhiIPhiFull5x5[selectedPhotonIndex];
+
+	phoSeedTime_ = std::abs((_phoSeedTime[selectedPhotonIndex]));
+	phoSeedEnergy_ = _phoSeedEnergy[selectedPhotonIndex];
+	phoMIPChi2_ = _phoMIPChi2[selectedPhotonIndex];
+	phoMIPTotEnergy_ = _phoMIPTotEnergy[selectedPhotonIndex];
+	phoMIPSlope_ = _phoMIPSlope[selectedPhotonIndex];
+	phoMIPIntercept_ = _phoMIPIntercept[selectedPhotonIndex];
+	phoMIPNhitCone_ = _phoMIPNhitCone[selectedPhotonIndex];
+
+	selectedPhotonSCindex = findSecondaryIndex((_phoSCindex[selectedPhotonIndex]), (_ecalSCindex));
+	if(selectedPhotonSCindex > -1){
+		phoSCLICTD_ = _ecalSC_LICTD[selectedPhotonSCindex];
+		phoSCmaxEnXtalTime_ = _ecalSC_maxEnXtalTime[selectedPhotonSCindex];
+		phoSCmaxEnXtalSwissCross_ = _ecalSC_maxEnXtalSwissCross[selectedPhotonSCindex];
+	} else{
+		phoSCLICTD_ = std::numeric_limits<Float_t>::min();
+		phoSCmaxEnXtalTime_ = std::numeric_limits<Float_t>::min();
+		phoSCmaxEnXtalSwissCross_ = std::numeric_limits<Float_t>::min();
+	}
 
 	pfMET_ = _pfMET;
 	pfMETPhi_ = _pfMETPhi;
@@ -383,8 +438,8 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	if(getBit(metFilters, 0)) return 0;			//Flag_goodVertices
 	registerCutFlow();
 
-	if(getBit(metFilters, 1)) return 0;			//Flag_globalSuperTightHalo2016Filter
-	registerCutFlow();
+	// if(getBit(metFilters, 1)) return 0;			//Flag_globalSuperTightHalo2016Filter
+	// registerCutFlow();
 
 	if(getBit(metFilters, 2)) return 0;			//Flag_HBHENoiseFilter
 	registerCutFlow();
@@ -405,8 +460,10 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	if(getBit(metFilters, 9)) return 0;			//Updated ecalBadCalibFilter
 	registerCutFlow();
 
-	// cout<<getBit(metFilters, 0)<<" "<<getBit(metFilters, 1)<<" "<<getBit(metFilters, 2)<<" "<<getBit(metFilters, 3)<<" "<<getBit(metFilters, 4)<<" "<<getBit(metFilters, 5)<<" "<<getBit(metFilters, 6)<<" "<<getBit(metFilters, 7)<<" "<<getBit(metFilters, 8)<<" "<<getBit(metFilters, 9)<<endl;
 
+	 UShort_t tmpBeamHaloSummary = _beamHaloSummary;
+	if(getBit(tmpBeamHaloSummary, 11)) return 0;		//global_TightHalo2016
+	registerCutFlow();
 
 
 	// Get highest pT photon
@@ -415,7 +472,7 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	// Conversion safe electron veto
 	// |eta| < 2.5
 	// Exclude B-E transition region
-	Short_t _220GeVphoCounter = 0;
+	Short_t _phoCounter = 0;
 	selectedPhotonIndex = -999;
 	Float_t highestPtPhotonPt = -999.;
 	for(Int_t i = 0; i < (_nPho); i++){
@@ -423,11 +480,24 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 		if(candPhoPt < 220.) continue;
 		Float_t candPhoAbsEta = std::abs(_phoEta[i]);
 		if(candPhoAbsEta > 2.5 ) continue;
-		if((candPhoAbsEta > BETRetaMin) && (candPhoAbsEta < BETRetaMax)) continue;
+		if(candPhoAbsEta > BETRetaMin ) continue;	// EB only
+	//	 if(candPhoAbsEta < BETRetaMax ) continue;	// EE only
+		// if((candPhoAbsEta > BETRetaMin) && (candPhoAbsEta < BETRetaMax)) continue;
+		UChar_t tmpphoQualityBits = _phoQualityBits[i];
+		if(!getBit(tmpphoQualityBits,1)) continue;		//electron veto
 		UChar_t candPhoIDbit= (_phoIDbit[i]);
-		if(!getBit(candPhoIDbit, 3)) continue;
-		if(!(_phoEleVeto[i])) continue;
-		_220GeVphoCounter++;
+		if(!getBit(candPhoIDbit, 3)) continue;		//	mvaPhoID-RunIIFall17-v2-wp80
+
+		if((_phoMIPTotEnergy[i]) > 4.9) continue;
+		if((_phoSigmaIEtaIEtaFull5x5[i]) < 0.001) continue;
+		if((_phoSigmaIPhiIPhiFull5x5[i]) < 0.001) continue;
+		// if(!getBit(candPhoIDbit,7)) continue;		//	MIPisNOThalo
+
+		// Short_t tmpPhotonSCindex = findSecondaryIndex((_phoSCindex[i]), (_ecalSCindex));
+		// if(std::abs((_ecalSC_LICTD[tmpPhotonSCindex])) > 5.) continue;
+		// if(std::abs((_ecalSC_maxEnXtalTime[tmpPhotonSCindex])) > 3.) continue;
+
+		_phoCounter++;
 		if(candPhoPt > highestPtPhotonPt){
 			highestPtPhotonPt = candPhoPt;
 			selectedPhotonIndex = i;
@@ -437,17 +507,14 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	registerCutFlow();
 
 
-
-	if(_220GeVphoCounter > 1) return 0;
+	if(_phoCounter > 1) return 0;
 	registerCutFlow();
-
 
 
 	// delta phi cut of 2. between selected photon and MET
 	deltaPhi_phoMET_ = deltaPhi((_pfMETPhi), (_phoPhi[selectedPhotonIndex]));
 	if(deltaPhi_phoMET_ < 2.) return 0;
 	registerCutFlow();
-
 
 
 	// Electron rejection
@@ -460,7 +527,6 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	registerCutFlow();
 
 
-
 	// Muon rejection
 	for(Int_t i = 0; i < (_nMu); i++){
 		if((_muPt[i]) < 10.) continue;
@@ -471,18 +537,16 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	registerCutFlow();
 
 
-
 	// Jet rejection
 	UShort_t jetCounter = 0;
 	for(Int_t i = 0; i < (_nAK4CHSJet); i++){
 		if((_AK4CHSJet_Pt[i]) < 30.) continue;
 		Char_t tmpJetPUIDbit = (_AK4CHSJet_PUFullID[i]);
-		if(!getBit(tmpJetPUIDbit, 1)) continue;					// medium pileup ID
+		if(!getBit(tmpJetPUIDbit, 1)) continue;					// medium pileup ID as defined here https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetID#Information_for_13_TeV_data_anal
 		jetCounter++;
 	}
 	if(jetCounter > 1) return 0;
 	registerCutFlow();
-
 
 
 	return 1;
@@ -500,7 +564,7 @@ void aNTGCpreselector::analyze(){
 		ULong64_t current_entry = inputTTreeReader.GetCurrentEntry();
 
 		if(current_entry % REPORT_EVERY == 0){
-			std::cout<<"\t"<< getCurrentTime()<<"\t\t\tAnalyzing entry\t"<<current_entry<<std::endl;
+			std::cout<<"\t"<< getCurrentTime()<<"\tAnalyzing entry\t"<<current_entry<<",\tevent "<<  (_event) <<std::endl;
 		}
 
 		if(isMC){

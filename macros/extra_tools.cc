@@ -50,6 +50,7 @@
 #include <string>
 #include <chrono>
 #include <ctime>
+#include "limits"
 
 
 
@@ -99,7 +100,7 @@ std::string getUnit(std::string ystring);
 std::string eraseUnit(std::string ystring);
 std::string first_numberstring(std::string const & str);
 std::vector<Double_t> getXbins(TH1 *hist);
-void closeTChain(TChain *_chain);
+void closeTChain(TChain * & _chain);
 void setFrameColor(TAxis* _axis, std::string _color);
 void setFrameColor(TH1* _hist, std::string _color);
 void setFrameColor(THStack* _stack, std::string _color);
@@ -128,6 +129,7 @@ Float_t getMean(std::vector<Float_t> _set);
 template <class ObjType>
 ObjType copyObjectDeleteSrc(ObjType *_original);
 Short_t findSecondaryIndex(Short_t searchIndex, std::vector<Short_t> container);
+Short_t findSecondaryIndex(Short_t searchIndex, std::vector<UShort_t> container);
 std::string getCurrentTime();
 
 
@@ -141,6 +143,8 @@ struct TTreeReaderArrayValue;
 struct plot_variable;
 struct histogram_template;
 struct twoDhistogram_template;
+struct bit_histogram_template;
+struct bit_twoDhistogram_template;
 template <typename anytype>
 struct vector_association;
 struct BinCollection;
@@ -148,6 +152,7 @@ struct signal_atts;
 struct sample;
 struct Profile2D;
 struct parseOptions;
+struct bitBar2D;
 
 class CSVReader;
 
@@ -359,7 +364,7 @@ struct histogram_template {
 		trim(histName);
 		if(histTitle.empty()) histTitle = title_prefix;
 		trim(histTitle);
-		std::string titles = histTitle + ";" + var->xtitle + (var->xunit.empty()?"":(" ["+var->xunit+"]")) + ";" + "# of events"+binwidth_string;
+		std::string titles = title_prefix + histTitle + ";" + var->xtitle + (var->xunit.empty()?"":(" ["+var->xunit+"]")) + ";" + "# of events"+binwidth_string;
 		if(var->xBins != nullptr) hist = new TH1F(histName.c_str(), titles.c_str(), var->nbins, var->xBins);
 		else hist = new TH1F(histName.c_str(), titles.c_str(), var->nbins, var->xmin, var->xmax);
 		hist->GetXaxis()->CenterTitle();
@@ -421,7 +426,7 @@ struct twoDhistogram_template {
 		trim(histName);
 		if(histTitle.empty()) histTitle =  title_prefix;
 		trim(histTitle);
-		std::string titles = histTitle + ";" + xvar->xtitle + (xvar->xunit.empty()?"":(" ["+xvar->xunit+"]")) + ";" + yvar->xtitle + (yvar->xunit.empty()?"":(" ["+yvar->xunit+"]")) ;
+		std::string titles = title_prefix + histTitle + ";" + xvar->xtitle + (xvar->xunit.empty()?"":(" ["+xvar->xunit+"]")) + ";" + yvar->xtitle + (yvar->xunit.empty()?"":(" ["+yvar->xunit+"]")) ;
 		if(xvar->xBins != nullptr && yvar->xBins == nullptr){
 			hist = new TH2F(histName.c_str(), titles.c_str(), xvar->nbins, xvar->xBins, yvar->nbins, yvar->xmin, yvar->xmax);
 		}
@@ -448,6 +453,64 @@ struct twoDhistogram_template {
 	}
 private:
 	Bool_t isUser = 0;
+};
+
+
+struct bit_histogram_template: histogram_template {
+	Bool_t *selector = nullptr;
+	std::string prefix;
+	bit_histogram_template(){};
+
+	bit_histogram_template(const plot_variable &_var, Bool_t *_selector, std::string _prefix){
+		bitHistSet(_var, _selector, _prefix);
+	};
+
+	void bitHistSet(const plot_variable &_var, Bool_t *_selector, std::string _prefix){
+		selector = _selector;
+		prefix = _prefix;
+		set(_var);
+	};
+
+	void bitHistInit(){
+		initializehist(prefix, prefix);
+	};
+
+	void fillBit(Double_t _weight=1.){
+		if(*selector){
+			fill(_weight);
+		} else{
+			hist->Fill(std::numeric_limits<Float_t>::max(), _weight);
+		}
+	};
+};
+
+
+struct bit_twoDhistogram_template: twoDhistogram_template{
+	Bool_t *selector = nullptr;
+	std::string prefix;
+	bit_twoDhistogram_template(){};
+
+	bit_twoDhistogram_template(const plot_variable &_xvar, const plot_variable &_yvar, Bool_t *_selector, std::string _prefix){
+		bitHistSet(_xvar, _yvar, _selector, _prefix);
+	};
+
+	void bitHistSet(const plot_variable &_xvar, const plot_variable &_yvar, Bool_t *_selector, std::string _prefix){
+		selector = _selector;
+		prefix = _prefix;
+		set(_xvar, _yvar);
+	};
+
+	void bitHistInit(){
+		initializehist(prefix, prefix);
+	};
+
+	void fillBit(Double_t _weight=1.){
+		if(*selector){
+			fill(_weight);
+		} else{
+			hist->Fill(*(xvar->xptr), std::numeric_limits<Float_t>::max(), _weight);
+		}
+	};
 };
 
 struct signal_atts {
@@ -612,6 +675,7 @@ struct parseOptions {
 
 
 	void parseIt(std::string _optFile){
+		optMap.clear();
 		std::cout<<"\t\tOptions parsed from file "<<_optFile<<"... ";
 		CSVReader _csvFile(_optFile);
 		std::vector<std::vector<std::string>> _data = _csvFile.getData();
@@ -621,6 +685,8 @@ struct parseOptions {
 			if(_optName.empty()) continue;
 			std::string _optVal = _data[i][1];
 			optMap[_optName] = _optVal;
+
+			std::cout<<"\t\t"<<_optName<<" = "<<optMap[_optName]<<std::endl;
 		}
 		std::cout<<" parsed!"<<std::endl;
 	};
@@ -639,6 +705,54 @@ struct parseOptions {
 		}
 		return optMap.at(_opt);
 	};
+};
+
+
+struct bitBar2D {
+	TH2F hist;
+	std::vector<const Bool_t*> xVars;
+	const Float_t *yVar = nullptr;
+
+	bitBar2D(){};
+	bitBar2D(std::vector<std::pair<Bool_t*, std::string>> _xVars, const plot_variable & _yVar){
+		init(_xVars, _yVar);
+	};
+
+	void init(std::vector<std::pair<Bool_t*, std::string>> _xVars, const plot_variable & _yVar){
+		yVar = _yVar.xptr;
+		Int_t nxBins = _xVars.size();
+
+		std::string histName = removeNonAlpha(_yVar.xtitle) + "__vs__";
+		std::string histTitle = _yVar.xtitle + " vs (";
+		for(Int_t i = 0; i < _xVars.size(); i++){
+			histName += removeNonAlpha(_xVars[i].second)+"_";
+			histTitle += _xVars[i].second + ", ";
+			xVars.push_back(_xVars[i].first);
+		}
+		histName.pop_back();
+		histTitle.pop_back();
+		histTitle.pop_back();
+		histTitle += ")";
+
+		histTitle += ";;" + _yVar.xtitle;
+		histTitle += _yVar.xunit.empty() ? "" : ("[" + _yVar.xunit + "]");
+		if(_yVar.xBins == nullptr) hist = TH2F(histName.c_str(), histTitle.c_str(), nxBins, 0., (Float_t)nxBins, _yVar.nbins, _yVar.xmin, _yVar.xmax);
+		else hist = TH2F(histName.c_str(), histTitle.c_str(), nxBins, 0., (Float_t)nxBins, _yVar.nbins, _yVar.xBins);
+
+		for(Int_t i = 0; i < _xVars.size(); i++){
+			hist.GetXaxis()->SetBinLabel(i+1, _xVars[i].second.c_str());
+		}
+
+		hist.GetYaxis()->CenterTitle();
+
+		std::cout<<"\t\t\tInitialized bitBar2D "<<histTitle<<std::endl;
+	}
+
+	void fill(Float_t weight = 1.){
+		for(Int_t i = 0; i < xVars.size(); i++){
+			hist.Fill((Float_t)*xVars[i]+0.01, *yVar, (Float_t)*xVars[i] * weight);
+		}
+	}
 };
 
 
@@ -983,7 +1097,7 @@ TH1* rebinHist(TH1* _hist, Double_t _statUnc){
 	if(_goodBins.size()<2) return _hist;
 	std::string _newname = "rebinned_" + (std::string)_hist->GetName();
 	TH1* _rebinnedHist = (TH1*) _hist->Rebin(_goodBins.size()-1, _newname.c_str(), _goodBins.data());
-	_rebinnedHist->Scale(1,"width");
+	// _rebinnedHist->Scale(1.,"width");
 	return _rebinnedHist;
 };
 
@@ -1158,13 +1272,14 @@ std::string first_numberstring(std::string const & str){
 };
 
 
-void closeTChain(TChain *_chain){
+void closeTChain(TChain * & _chain){
 	if(!_chain){
 		std::cout<<"Error! TChain is null!"<<std::endl;
 	}
 	TFile *file = _chain->GetCurrentFile();
 	_chain->SetDirectory(0);
 	if(file) delete file;
+	_chain = nullptr;
 };
 
 
@@ -1714,7 +1829,22 @@ ObjType copyObjectDeleteSrc(ObjType *_original){
 Short_t findSecondaryIndex(Short_t searchIndex, std::vector<Short_t> container){
 	Short_t secondaryIndex = -999;
 	for(Int_t i = 0; i < container.size(); i++){
-		if( container[i] ==  searchIndex) secondaryIndex = i;
+		if( container[i] ==  searchIndex) {
+			secondaryIndex = i;
+			break;
+		}
+	}
+	return secondaryIndex;
+};
+
+
+Short_t findSecondaryIndex(Short_t searchIndex, std::vector<UShort_t> container){
+	Short_t secondaryIndex = -999;
+	for(Int_t i = 0; i < container.size(); i++){
+		if( container[i] ==  searchIndex) {
+			secondaryIndex = i;
+			break;
+		}
 	}
 	return secondaryIndex;
 };
@@ -1724,6 +1854,7 @@ std::string getCurrentTime(){
 	std::chrono::time_point<std::chrono::system_clock> _now = std::chrono::system_clock::now();
 	std::time_t _now_ = std::chrono::system_clock::to_time_t(_now);
 	std::string c_time = std::ctime(&_now_);
+	c_time.erase(std::remove(c_time.begin(), c_time.end(), '\n'), c_time.end());
 	return c_time;
 };
 

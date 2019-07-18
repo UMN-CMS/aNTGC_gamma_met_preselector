@@ -1,12 +1,7 @@
-writeDir,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/compareModels/
-xSectionMap,../data/2019_aNTGC_mean_xSections.txt
-colName,0
-colXsec,1
+writeDir,/scratch/mwadud/anTGC_GammaMET/preSelected07June2019_merged/plots/
 histList,../data/histList.txt
-datasetList,/scratch/mwadud/anTGCpreselector/out/preSelected_wDCremoval_op4/test_h3z0p0008_2019VtxModel_preSelected.txt
-ttSample,TTJetsTuneCP513TeVamcatnloFXFXpythia8
-ttSampleLegend,t#bar{t}+Jets
-binThreshold,0.5
+inDir,/scratch/mwadud/anTGC_GammaMET/preSelected07June2019_merged/
+binThreshold,1.
 linewidth,6.
 markerSize,2
 pad1axislabelsize,0.05
@@ -45,7 +40,7 @@ errorBandFillStyle,3005
 dataMarkerStyle,21
 ratioPlotYtitle,Data/MC
 rebinStatUnc,0.20
-luminosity,41063.
+luminosity,33737.
 dataLineWidth,6.
 ratioMax,2..
 ratioMin,0.5
@@ -56,5 +51,4 @@ ratioNspread,10.
 stackMin,0.8
 dataMCopt1,E2
 dataMCopt2,PESAME
-maxBinRatio,2.
-kFactor,1.3
+maxBinRatio,1.5

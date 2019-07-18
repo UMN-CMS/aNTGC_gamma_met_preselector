@@ -1,0 +1,5 @@
+/scratch/mwadud/anTGCpreselector/ntupleLists/SinglePhotonRun2017C17Nov2017v1MINIAOD.txt
+/scratch/mwadud/anTGCpreselector/ntupleLists/SinglePhotonRun2017B17Nov2017v1MINIAOD.txt
+/scratch/mwadud/anTGCpreselector/ntupleLists/SinglePhotonRun2017E17Nov2017v1MINIAOD.txt
+/scratch/mwadud/anTGCpreselector/ntupleLists/SinglePhotonRun2017F17Nov2017v1MINIAOD.txt
+/scratch/mwadud/anTGCpreselector/ntupleLists/SinglePhotonRun2017D17Nov2017v1MINIAOD.txt

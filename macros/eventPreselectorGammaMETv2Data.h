@@ -7,7 +7,7 @@
 #define BETRetaMin 1.4442
 #define BETRetaMax 1.566
 #define HBetaMax 1.3920 				// Josh H
-/***************************************/
+//***************************************//
 
 #define ZMASS 91.1876
 
@@ -44,14 +44,14 @@ private:
 	Bool_t is2016MCsample;
 	Float_t xSec;
 
-	/***********************************************input TTree *******************************************/
+	//***********************************************input TTree *******************************************//
 
 	TTreeReader inputTTreeReader;
 	TChain *inputTree = nullptr;
 
 	TTreeReaderAnyValue<Int_t> 				_run;
 	TTreeReaderAnyValue<Long64_t> 			_event;
-	TTreeReaderAnyValue<Int_t> 				_lumis;
+	TTreeReaderAnyValue<UShort_t> 			_lumis;
 
 	TTreeReaderAnyValue<UChar_t>			_puTrue;
 
@@ -60,6 +60,8 @@ private:
 	TTreeReaderAnyValue<Bool_t> 			_isPVGood;
 
 	TTreeReaderAnyValue<ULong64_t> 			_HLTPho;
+
+	TTreeReaderAnyValue<UShort_t>			_beamHaloSummary;
 
 	TTreeReaderAnyValue<Float_t>			_genWeight;
 	TTreeReaderAnyValue<Char_t> 			_mcHasDirectPromptPho;
@@ -80,8 +82,7 @@ private:
 	TTreeReaderVectorValue<Float_t> 		_phoCalibE;
 	TTreeReaderVectorValue<Float_t> 		_phoSigmaCalibE;
 	TTreeReaderVectorValue<Float_t> 		_phoCalibEt;
-	TTreeReaderVectorValue<Bool_t> 			_phohasPixelSeed;
-	TTreeReaderVectorValue<Bool_t> 			_phoEleVeto;
+	TTreeReaderVectorValue<UChar_t> 		_phoQualityBits;
 	TTreeReaderVectorValue<Float_t> 		_phoR9;
 	TTreeReaderVectorValue<Float_t>		 	_phoR9Full5x5;
 	TTreeReaderVectorValue<Float_t>		 	_phoSigmaIEtaIEtaFull5x5;
@@ -90,7 +91,32 @@ private:
 	TTreeReaderVectorValue<Float_t> 		_phoIDMVA;
 	TTreeReaderVectorValue<UChar_t> 		_phoIDbit;
 	TTreeReaderVectorValue<Float_t>			_phoSeedTime;
+	TTreeReaderVectorValue<Float_t>			_phoSeedEnergy;
+	TTreeReaderVectorValue<Float_t>			_phoMIPChi2;
+	TTreeReaderVectorValue<Float_t>			_phoMIPTotEnergy;
+	TTreeReaderVectorValue<Float_t>			_phoMIPSlope;
+	TTreeReaderVectorValue<Float_t>			_phoMIPIntercept;
+	TTreeReaderVectorValue<Short_t>			_phoMIPNhitCone;
+	TTreeReaderVectorValue<Short_t>			_phoSCindex;
 	TTreeReaderVectorValue<Short_t> 		_pho_gen_index;
+
+	TTreeReaderVectorValue<UShort_t> 		_ecalSCindex;
+	TTreeReaderVectorValue<Float_t> 		_ecalSCeta;
+	TTreeReaderVectorValue<Float_t> 		_ecalSCphi;
+	TTreeReaderVectorValue<Float_t> 		_ecalSCEn;
+	TTreeReaderVectorValue<Float_t> 		_ecalSCRawEn;
+	TTreeReaderVectorValue<Float_t> 		_ecalSCetaWidth;
+	TTreeReaderVectorValue<Float_t> 		_ecalSCphiWidth;
+	TTreeReaderVectorValue<Float_t> 		_ecalSC_LICTD;
+	TTreeReaderVectorValue<Float_t> 		_ecalSC_maxEnXtalTime;
+	TTreeReaderVectorValue<Float_t> 		_ecalSC_maxEnXtalSwissCross;
+	TTreeReaderVectorValue<Float_t> 		_ecalSC_maxEnXtalBits;
+	TTreeReaderVectorValue<UChar_t> 		_ecalSC_nL1Spike;
+	TTreeReaderVectorValue<UChar_t> 		_ecalSC_nDiweird;
+	TTreeReaderVectorValue<UChar_t> 		_ecalSC_nWeird;
+	TTreeReaderVectorValue<UChar_t> 		_ecalSC_nSaturated;
+	TTreeReaderVectorValue<UChar_t> 		_ecalSC_nOutOfTime;
+	TTreeReaderVectorValue<UChar_t> 		_ecalSC_nXtals;
 
 	TTreeReaderAnyValue<UShort_t> 			_metFilters;
 	TTreeReaderAnyValue<Float_t> 			_pfMET;
@@ -98,14 +124,13 @@ private:
 	TTreeReaderAnyValue<Float_t> 			_pfMET_metSig;
 	TTreeReaderAnyValue<Float_t> 			_pfMET_EtSig;
 
-
 	TTreeReaderAnyValue<UShort_t>			_nEle;
 	TTreeReaderVectorValue<Float_t> 		_eleCalibPt;
 	TTreeReaderVectorValue<Float_t> 		_eleEta;
 	TTreeReaderVectorValue<Float_t> 		_elePhi;
 	TTreeReaderVectorValue<Float_t> 		_eleCalibEn;
 	TTreeReaderVectorValue<Float_t> 		_eleIDMVAIso;
-	TTreeReaderVectorValue<Char_t> 			_eleIDbit;
+	TTreeReaderVectorValue<UChar_t> 		_eleIDbit;
 
 	TTreeReaderAnyValue<UShort_t>			_nMu;
 	TTreeReaderVectorValue<Float_t> 		_muPt;
@@ -113,7 +138,6 @@ private:
 	TTreeReaderVectorValue<Float_t> 		_muPhi;
 	TTreeReaderVectorValue<Float_t> 		_muEn;
 	TTreeReaderVectorValue<Int_t> 			_muIDbit;
-
 
 	TTreeReaderAnyValue<UShort_t>			_nAK4CHSJet;
 	TTreeReaderVectorValue<Float_t> 		_AK4CHSJet_Pt;
@@ -125,11 +149,12 @@ private:
 	TTreeReaderVectorValue<Char_t> 			_AK4CHSJet_PUFullID;
 
 	// Running vars
-	Int_t selectedPhotonIndex = -999;
+	Short_t selectedPhotonIndex = -999;
+	Short_t selectedPhotonSCindex = -999;
 
 
 
-	/***********************************************output TTree branches***********************************/
+	//***********************************************output TTree branches***********************************//
 	// only selected reconstructed objects
 
 	TFile *outFile = nullptr;
@@ -154,6 +179,16 @@ private:
 	Float_t		 				phoSigmaIEtaIEtaFull5x5_;
 	Float_t		 				phoSigmaIEtaIPhiFull5x5_;
 	Float_t						phoSigmaIPhiIPhiFull5x5_;
+	Float_t						phoSeedTime_;
+	Float_t 					phoSeedEnergy_;
+	Float_t 					phoMIPChi2_;
+	Float_t						phoMIPTotEnergy_;
+	Float_t						phoMIPSlope_;
+	Float_t						phoMIPIntercept_;
+	Short_t 					phoMIPNhitCone_;
+	Float_t 					phoSCLICTD_;
+	Float_t						phoSCmaxEnXtalTime_;
+	Float_t						phoSCmaxEnXtalSwissCross_;
 
 	Float_t 					genPhoPt_;
 	Float_t 					genPhoEta_;
@@ -187,11 +222,12 @@ private:
 	TH1F h_cutFlowWeighted{"cutFlow", "Cut Flow", 20, 0., 20.};
 	TH1F h_cutFlowWeightSigns{"cutFlowWgtSigns", "Cut Flow (weight signs)", 20, 0., 20.};
 
-	/***********************************************BoostedJet+G histograms***********************************/
+	//***********************************************BoostedJet+G histograms***********************************//
 
 	Float_t p_RECOoverGEN_MET;
 	Float_t p_nVtx;
 	Float_t p_absPhoEta;
+
 
 	plot_variable 	 	var_phoCalibEt{phoCalibEt_, 0., 1500., 300, "p_{T}(\\gamma)", "GeV"},
 						var_phoEta{phoEta_, ECAL_ETA_BINS, 27, "\\eta(\\gamma)"},
@@ -200,6 +236,11 @@ private:
 						var_phoSigmaIEtaIEtaFull5x5{phoSigmaIEtaIEtaFull5x5_, 0., 0.1, 1000, "#sigma_{i#eta i#eta}", ""},
 						var_phoSigmaIEtaIPhiFull5x5{phoSigmaIEtaIPhiFull5x5_, -0.001, 0.001, 2000, "#sigma_{i#eta i#phi}", ""},
 						var_phoSigmaIPhiIPhiFull5x5{phoSigmaIPhiIPhiFull5x5_, 0., 0.1, 1000, "#sigma_{i#phi i#phi}", ""},
+						var_phoSeedTime{phoSeedTime_, -10., 10., 100, "#tau_{seed}", "ns"},
+						var_phoMIPTotEnergy{phoMIPTotEnergy_, 0., 100., 1000, "MIP_{tot}", "GeV"},
+						var_phoSCLICTD{phoSCLICTD_, 0., 100., 1000, "LICTD", "ns"},
+						var_phoSCmaxEnXtalTime{phoSCmaxEnXtalTime_, -50., 50., 1000, "#tau_{max}", "ns"},
+						var_phoSCmaxEnXtalSwissCross{phoSCmaxEnXtalSwissCross_, -10., 10., 200, "1 - E_{4}/E_{max}", "GeV"},
 						var_phoGenPt_{genPhoPt_, 0., 1500., 300, "p_{T}(gen\\ \\gamma)", "GeV"},
 						var_phoGenEta_{genPhoEta_,  ECAL_ETA_BINS, 27, "\\eta(gen\\ \\gamma)"},
 						var_phoGenPhi_{genPhoPhi_, -3.15, 3.15, 63, "\\phi(gen\\ \\gamma)"},
@@ -214,7 +255,6 @@ private:
 						var_p_RECOoverGEN_MET{p_RECOoverGEN_MET, 0., 10., 1000, "#slash{E}_{T}^{RECO}/#slash{E}_{T}^{GEN}", ""};
 
 
-
 	std::vector<histogram_template> GammaMET_1d_reco_histograms = {
 		{var_phoCalibEt},
 		{var_phoEta},
@@ -227,7 +267,10 @@ private:
 		{var_phoSigmaIEtaIPhiFull5x5},
 		{var_phoSigmaIPhiIPhiFull5x5},
 		{var_pfMET_metSig},
-		{var_pfMET_EtSig}
+		{var_pfMET_EtSig},
+		{var_phoSCmaxEnXtalSwissCross},
+		{var_phoSCmaxEnXtalTime},
+		{var_phoSCLICTD}
 	};
 
 
@@ -236,14 +279,33 @@ private:
 		// {var_phoEta, var_phoSigmaIEtaIEtaFull5x5},
 		// {var_phoEta, var_phoSigmaIEtaIPhiFull5x5},
 		// {var_phoEta, var_phoSigmaIPhiIPhiFull5x5},
-		{var_phoEta, var_phoCalibEt},
+		{var_phoPhi, var_pfMETPhi_},
 		{var_phoEta, var_phoPhi},
-		{var_phoEta, var_pfMETPhi_}
+		{var_phoEta, var_pfMETPhi_},
+
+		{var_phoPhi, var_phoSeedTime},
+		{var_phoPhi, var_phoMIPTotEnergy},
+		{var_phoPhi, var_phoSCLICTD},
+		{var_phoPhi, var_phoSCmaxEnXtalTime},
+		{var_phoPhi, var_phoSCmaxEnXtalSwissCross},
+
+		{var_phoSCLICTD, var_phoSCmaxEnXtalTime},
+		{var_phoSCLICTD, var_phoSCmaxEnXtalSwissCross},
+
+		{var_phoEta, var_phoSeedTime},
+		{var_phoEta, var_phoMIPTotEnergy},
+		{var_phoEta, var_phoSCLICTD},
+		{var_phoEta, var_phoSCmaxEnXtalTime},
+		{var_phoEta, var_phoSCmaxEnXtalSwissCross},
+
+		{var_phoSeedTime, var_phoSCmaxEnXtalTime}
 	};
+
 
 	std::vector<twoDhistogram_template> GammaMET_2d_gen_Histograms ={
 		{var_phoGenPt_, var_deltaPhi_gen_phoMET}
 	};
+
 
 	std::vector<histogram_template> GammaMET_1d_gen_histograms ={
 		{var_phoGenPt_},
