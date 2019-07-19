@@ -461,8 +461,27 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 	registerCutFlow();
 
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////// From https://github.com/UMN-CMS/aNTGCntuplizer/blob/METv2/ggNtuplizer/plugins/ggNtuplizer_globalEvent.cc#L97
+	/////// if(beamHaloSummaryHandle->CSCLooseHaloId()) setbit(beamHaloSummary_, 0);
+    /////// if(beamHaloSummaryHandle->CSCTightHaloId()) setbit(beamHaloSummary_, 1);
+    /////// if(beamHaloSummaryHandle->CSCTightHaloId2015()) setbit(beamHaloSummary_, 2);
+    /////// if(beamHaloSummaryHandle->CSCTightHaloIdTrkMuUnveto()) setbit(beamHaloSummary_, 3);
+    /////// if(beamHaloSummaryHandle->EcalLooseHaloId()) setbit(beamHaloSummary_, 4);
+    /////// if(beamHaloSummaryHandle->EcalTightHaloId()) setbit(beamHaloSummary_, 5);
+    /////// if(beamHaloSummaryHandle->EventSmellsLikeHalo()) setbit(beamHaloSummary_, 6);
+    /////// if(beamHaloSummaryHandle->ExtremeTightId()) setbit(beamHaloSummary_, 7);
+    /////// if(beamHaloSummaryHandle->GlobalLooseHaloId()) setbit(beamHaloSummary_, 8);
+    /////// if(beamHaloSummaryHandle->GlobalSuperTightHaloId2016()) setbit(beamHaloSummary_, 9);
+    /////// if(beamHaloSummaryHandle->GlobalTightHaloId()) setbit(beamHaloSummary_, 10);
+    /////// if(beamHaloSummaryHandle->GlobalTightHaloId2016()) setbit(beamHaloSummary_, 11);
+    /////// if(beamHaloSummaryHandle->HcalLooseHaloId()) setbit(beamHaloSummary_, 12);
+    /////// if(beamHaloSummaryHandle->HcalTightHaloId()) setbit(beamHaloSummary_, 13);
+    /////// if(beamHaloSummaryHandle->LooseId()) setbit(beamHaloSummary_, 14);
+    /////// if(beamHaloSummaryHandle->TightId()) setbit(beamHaloSummary_, 15);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 UShort_t tmpBeamHaloSummary = _beamHaloSummary;
-	if(getBit(tmpBeamHaloSummary, 11)) return 0;		//global_TightHalo2016
+	if(getBit(tmpBeamHaloSummary, 15)) return 0;		//halo ID
 	registerCutFlow();
 
 
@@ -480,8 +499,8 @@ Bool_t aNTGCpreselector::selectGammaMETevent(){
 		if(candPhoPt < 220.) continue;
 		Float_t candPhoAbsEta = std::abs(_phoEta[i]);
 		if(candPhoAbsEta > 2.5 ) continue;
-		if(candPhoAbsEta > BETRetaMin ) continue;	// EB only
-	//	 if(candPhoAbsEta < BETRetaMax ) continue;	// EE only
+		// if(candPhoAbsEta > BETRetaMin ) continue;	// EB only
+		 if(candPhoAbsEta < BETRetaMax ) continue;	// EE only
 		// if((candPhoAbsEta > BETRetaMin) && (candPhoAbsEta < BETRetaMax)) continue;
 		UChar_t tmpphoQualityBits = _phoQualityBits[i];
 		if(!getBit(tmpphoQualityBits,1)) continue;		//electron veto

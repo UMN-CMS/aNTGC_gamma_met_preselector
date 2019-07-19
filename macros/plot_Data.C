@@ -85,7 +85,7 @@ void plotHist(std::string _histName){
 
 		thingsToDelete.push_back(cutHist);
 
-		//cutHist->SetLineStyle(histOpts.getInt("data" + std::to_string(i+1) + "linestyle"));
+		cutHist->SetLineStyle(histOpts.getInt("data" + std::to_string(i+1) + "linestyle"));
 
 		cutsStack.Add(cutHist, histOpts.get("histDrawOpt").c_str());
 
